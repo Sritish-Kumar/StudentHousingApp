@@ -11,6 +11,11 @@ const UserSchema = new mongoose.Schema(
       enum: ["STUDENT", "LANDLORD", "ADMIN"],
       default: "STUDENT",
     },
+    wishlist: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Property",
+      default: [],
+    }],
   },
   { timestamps: true }
 );
