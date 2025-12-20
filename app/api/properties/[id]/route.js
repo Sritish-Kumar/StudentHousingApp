@@ -61,12 +61,6 @@ export async function PUT(req, { params }) {
 
         // 5. Update
         const body = await req.json();
-        // Prevent updating owner or verification status directly if not admin (logic can be refined)
-        // For now, allow owner to update details.
-        // Explicitly exclude 'verified' from update to prevent self-verification?
-        // Requirement says "Update Property (Owner only)".
-        // Usually only Admin verifies. Let's exclude verified from simple update or assume body is safe.
-        // Better safe: extract allowed fields.
         const { title, description, price, gender, amenities, location, college } = body;
 
         property.title = title || property.title;
@@ -76,9 +70,6 @@ export async function PUT(req, { params }) {
         property.amenities = amenities || property.amenities;
         property.location = location || property.location;
         property.college = college || property.college;
-
-        // Note: We are not updating 'verified' here, ensuring it stays as is.
-        // Un-verify on edit? Business logic decision. For now, keep as is.
 
         await property.save();
 
