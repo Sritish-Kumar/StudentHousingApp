@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/jwt";
-import User from "@/backend/models/User.model";
+import { verifyToken } from "@/app/lib/jwt";
+import User from "@/app/backend/models/User.model";
 import { connectDB } from "@/app/backend/db/connect";
 
 export async function GET() {
