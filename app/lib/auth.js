@@ -54,3 +54,14 @@ export const isLandlord = async (req) => {
     }
     return user;
 };
+
+export const isAdmin = async (req) => {
+    const user = await getUserFromRequest(req);
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+    if (user.role !== "ADMIN") {
+        throw new Error("Forbidden: Admins only");
+    }
+    return user;
+};

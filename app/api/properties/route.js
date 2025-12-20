@@ -41,7 +41,6 @@ export async function POST(req) {
             {
                 propertyId: newProperty._id,
                 verified: newProperty.verified,
-                message: "Property created successfully",
             },
             { status: 201 }
         );
@@ -51,7 +50,7 @@ export async function POST(req) {
             return NextResponse.json({ message: error.message }, { status: 400 });
         }
         if (error.message.includes("Unauthorized") || error.message.includes("Forbidden")) {
-            return NextResponse.json({ message: error.message }, { status: 403 }); // Or 401
+            return NextResponse.json({ message: error.message }, { status: 403 });
         }
         return NextResponse.json(
             { message: "Internal Server Error" },
@@ -110,8 +109,7 @@ export async function GET(req) {
             title: prop.title,
             price: prop.price,
             verified: prop.verified,
-            distance: `${prop.distance}km`, // Formatting as string per requirement
-            // Add other fields if necessary
+            distance: `${prop.distance}km`,
         }));
 
         return NextResponse.json(formattedProperties, { status: 200 });
