@@ -11,16 +11,10 @@ export const getUserFromRequest = async (req) => {
         if (typeof req.cookies.get === 'function') {
             token = req.cookies.get("token")?.value;
         } else {
-            // Fallback if req.cookies is just an object (should not happen in NextRequest but good to check)
-            token = req.cookies.token; // Might need adjustment based on Next version
+            // Fallback if req.cookies is just an object
+            token = req.cookies.token;
         }
     }
-
-    console.log("Auth Debug:", {
-        hasAuthHeader: !!authHeader,
-        hasCookie: !!req.cookies,
-        token: token ? "Token Found" : "No Token"
-    });
 
     if (!token) {
         return null;
@@ -28,10 +22,8 @@ export const getUserFromRequest = async (req) => {
 
     try {
         const decoded = verifyToken(token);
-        console.log("Decoded User:", decoded);
         return decoded;
     } catch (error) {
-        console.error("Token Verification Error:", error.message);
         return null;
     }
 };
