@@ -1,286 +1,418 @@
+"use client";
+
+import { useState } from "react";
+
 export default function HomeContent() {
+  const [activeFilter, setActiveFilter] = useState("all");
+
+  const properties = [
+    {
+      id: 1,
+      title: "Modern Studio near MIT",
+      price: "$1,200",
+      distance: "0.3 mi",
+      image: "🏢",
+    },
+    {
+      id: 2,
+      title: "Shared 2BR - Harvard Sq",
+      price: "$850",
+      distance: "0.5 mi",
+      image: "🏠",
+    },
+    {
+      id: 3,
+      title: "Cozy 1BR with Parking",
+      price: "$1,400",
+      distance: "0.8 mi",
+      image: "🏘️",
+    },
+    {
+      id: 4,
+      title: "Luxury Apartment",
+      price: "$1,800",
+      distance: "1.2 mi",
+      image: "🏛️",
+    },
+  ];
+
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Animated Background Blobs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center">
-            <div className="inline-block mb-6 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
-              <span className="text-emerald-400 text-sm font-medium">
-                🎓 Trusted by 10,000+ Students
+      {/* Split-Screen Hero - Asymmetric 60/40 */}
+      <section className="min-h-screen flex flex-col lg:flex-row">
+        {/* Left: Content - 60% */}
+        <div className="lg:w-[60%] bg-gradient-to-br from-blue-50 via-white to-gray-50 px-6 sm:px-12 lg:px-20 py-20 lg:py-32 flex flex-col justify-center">
+          <div className="max-w-2xl">
+            <div className="inline-block mb-6 px-4 py-2 bg-blue-600/10 rounded-full border border-blue-600/20">
+              <span className="text-blue-700 text-sm font-medium">
+                Live • 847 properties available
               </span>
             </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              Find Your Perfect
-              <span className="block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                Student Housing
-              </span>
+
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-zinc-900 mb-6 leading-[1.1]">
+              Find your place
+              <span className="block text-blue-600 mt-2">near campus</span>
             </h1>
-            
-            <p className="text-xl text-zinc-400 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Discover verified, affordable housing near your campus. Connect
-              with trusted landlords and secure your ideal student home in
-              minutes.
+
+            <p className="text-xl text-zinc-600 mb-10 leading-relaxed">
+              Search verified student housing within walking distance of your
+              university.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="group relative bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-10 py-4 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/50">
-                <span className="relative z-10">Find Housing</span>
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
+
+            {/* Inline Search */}
+            <div className="relative group">
+              <input
+                type="text"
+                placeholder="Enter your university..."
+                className="w-full px-6 py-5 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-600 focus:outline-none transition-all duration-300 bg-white shadow-sm hover:shadow-md"
+              />
+              <button className="absolute right-2 top-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+                Search
               </button>
-              
-              <button className="border-2 border-zinc-700 hover:border-emerald-500 text-zinc-300 hover:text-emerald-400 px-10 py-4 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-105 hover:bg-emerald-500/5">
+            </div>
+
+            {/* Quick Stats */}
+            <div className="mt-12 flex gap-8">
+              <div className="group cursor-pointer">
+                <div className="text-3xl font-bold text-blue-600 group-hover:scale-110 transition-transform duration-300">
+                  10K+
+                </div>
+                <div className="text-sm text-zinc-600">Students</div>
+              </div>
+              <div className="group cursor-pointer">
+                <div className="text-3xl font-bold text-blue-600 group-hover:scale-110 transition-transform duration-300">
+                  850+
+                </div>
+                <div className="text-sm text-zinc-600">Properties</div>
+              </div>
+              <div className="group cursor-pointer">
+                <div className="text-3xl font-bold text-blue-600 group-hover:scale-110 transition-transform duration-300">
+                  4.9★
+                </div>
+                <div className="text-sm text-zinc-600">Rating</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Featured Property - 40% */}
+        <div className="lg:w-[40%] bg-gradient-to-br from-blue-600 to-indigo-700 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDI0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0xMiAxNmMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHptMCAyNGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
+
+          <div className="relative h-full flex flex-col justify-end p-8 lg:p-12">
+            <div className="absolute top-8 right-8 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30">
+              <span className="text-white text-sm font-medium">Featured</span>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 transform group-hover:scale-105 transition-all duration-500">
+              <div className="text-6xl mb-4">🏢</div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                Modern Studio
+              </h3>
+              <p className="text-blue-100 mb-4">
+                0.2 mi from campus • Verified
+              </p>
+              <div className="flex items-center justify-between">
+                <div className="text-3xl font-bold text-white">
+                  $1,200<span className="text-lg text-blue-100">/mo</span>
+                </div>
+                <button className="bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300">
+                  View
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Horizontal Property Carousel - Left Aligned */}
+      <section className="py-20 bg-white overflow-hidden">
+        <div className="px-6 sm:px-12 lg:px-20 mb-12">
+          <h2 className="text-4xl lg:text-5xl font-bold text-zinc-900 mb-4">
+            Available now
+          </h2>
+          <p className="text-xl text-zinc-600">
+            Properties ready for immediate move-in
+          </p>
+        </div>
+
+        <div className="flex gap-6 px-6 sm:px-12 lg:px-20 overflow-x-auto pb-6 scrollbar-hide">
+          {properties.map((property, index) => (
+            <div
+              key={property.id}
+              className="min-w-[320px] bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-3xl p-6 hover:border-blue-300 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer group"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                {property.image}
+              </div>
+              <h3 className="text-xl font-semibold text-zinc-900 mb-2">
+                {property.title}
+              </h3>
+              <div className="flex items-center gap-2 text-sm text-zinc-600 mb-4">
+                <span>📍 {property.distance}</span>
+                <span>•</span>
+                <span>✓ Verified</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold text-blue-600">
+                  {property.price}
+                  <span className="text-sm text-zinc-600">/mo</span>
+                </div>
+                <button className="opacity-0 group-hover:opacity-100 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300">
+                  Details
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Alternating Content Blocks - Staggered */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        {/* Block 1: Image Right */}
+        <div className="px-6 sm:px-12 lg:px-20 mb-32">
+          <div className="flex flex-col lg:flex-row gap-12 items-center">
+            <div className="lg:w-1/2 lg:pr-12">
+              <div className="inline-block mb-4 px-4 py-1 bg-blue-100 rounded-full">
+                <span className="text-blue-700 text-sm font-medium">
+                  Verified Listings
+                </span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold text-zinc-900 mb-6">
+                Every property is verified by our team
+              </h2>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                We personally visit and verify each listing to ensure quality,
+                safety, and accuracy. No surprises, no hidden fees.
+              </p>
+              <div className="flex gap-4">
+                <div className="flex-1 bg-white border border-gray-200 rounded-2xl p-4 hover:border-blue-300 transition-all duration-300">
+                  <div className="text-2xl mb-2">✓</div>
+                  <div className="text-sm font-semibold text-zinc-900">
+                    In-person verification
+                  </div>
+                </div>
+                <div className="flex-1 bg-white border border-gray-200 rounded-2xl p-4 hover:border-blue-300 transition-all duration-300">
+                  <div className="text-2xl mb-2">📸</div>
+                  <div className="text-sm font-semibold text-zinc-900">
+                    Real photos only
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="lg:w-1/2">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
+                <div className="relative bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl p-12 aspect-square flex items-center justify-center text-8xl group-hover:scale-105 transition-transform duration-500">
+                  🏠
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Block 2: Image Left */}
+        <div className="px-6 sm:px-12 lg:px-20">
+          <div className="flex flex-col lg:flex-row-reverse gap-12 items-center">
+            <div className="lg:w-1/2 lg:pl-12">
+              <div className="inline-block mb-4 px-4 py-1 bg-blue-100 rounded-full">
+                <span className="text-blue-700 text-sm font-medium">
+                  Instant Booking
+                </span>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold text-zinc-900 mb-6">
+                Book your room in minutes
+              </h2>
+              <p className="text-lg text-zinc-600 mb-8 leading-relaxed">
+                Secure payment, instant confirmation, and direct communication
+                with landlords. Move-in ready properties available now.
+              </p>
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                Start Searching
+              </button>
+            </div>
+            <div className="lg:w-1/2">
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-500"></div>
+                <div className="relative bg-gradient-to-br from-indigo-100 to-blue-100 rounded-3xl p-12 aspect-square flex items-center justify-center text-8xl group-hover:scale-105 transition-transform duration-500">
+                  ⚡
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Side-by-Side: Filters + Grid */}
+      <section className="py-20 bg-white">
+        <div className="px-6 sm:px-12 lg:px-20">
+          <div className="flex flex-col lg:flex-row gap-12">
+            {/* Left: Filters - 30% */}
+            <div className="lg:w-[30%]">
+              <h3 className="text-2xl font-bold text-zinc-900 mb-6">
+                Filter by
+              </h3>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm font-semibold text-zinc-700 mb-3 block">
+                    Price Range
+                  </label>
+                  <div className="flex gap-2">
+                    {["$500-$1K", "$1K-$1.5K", "$1.5K+"].map((range) => (
+                      <button
+                        key={range}
+                        onClick={() => setActiveFilter(range)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                          activeFilter === range
+                            ? "bg-blue-600 text-white shadow-lg"
+                            : "bg-gray-100 text-zinc-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {range}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-zinc-700 mb-3 block">
+                    Distance
+                  </label>
+                  <div className="space-y-2">
+                    {["< 0.5 mi", "< 1 mi", "< 2 mi"].map((distance) => (
+                      <label
+                        key={distance}
+                        className="flex items-center gap-3 cursor-pointer group"
+                      >
+                        <input
+                          type="checkbox"
+                          className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-zinc-700 group-hover:text-blue-600 transition-colors duration-300">
+                          {distance}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-zinc-700 mb-3 block">
+                    Amenities
+                  </label>
+                  <div className="space-y-2">
+                    {["Parking", "Furnished", "Utilities incl."].map(
+                      (amenity) => (
+                        <label
+                          key={amenity}
+                          className="flex items-center gap-3 cursor-pointer group"
+                        >
+                          <input
+                            type="checkbox"
+                            className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-zinc-700 group-hover:text-blue-600 transition-colors duration-300">
+                            {amenity}
+                          </span>
+                        </label>
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Property Grid - 70% */}
+            <div className="lg:w-[70%]">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-2xl font-bold text-zinc-900">
+                  247 properties found
+                </h3>
+                <select className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-600 focus:outline-none">
+                  <option>Closest first</option>
+                  <option>Price: Low to High</option>
+                  <option>Price: High to Low</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {properties.map((property, index) => (
+                  <div
+                    key={property.id}
+                    className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-blue-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer group"
+                  >
+                    <div className="bg-gradient-to-br from-blue-100 to-indigo-100 h-48 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform duration-500">
+                      {property.image}
+                    </div>
+                    <div className="p-6">
+                      <h4 className="text-lg font-semibold text-zinc-900 mb-2">
+                        {property.title}
+                      </h4>
+                      <div className="flex items-center gap-2 text-sm text-zinc-600 mb-4">
+                        <span>📍 {property.distance}</span>
+                        <span>•</span>
+                        <span className="text-blue-600">✓ Verified</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {property.price}
+                          <span className="text-sm text-zinc-600">/mo</span>
+                        </div>
+                        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all duration-300">
+                          View
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Diagonal CTA Section */}
+      <section className="relative py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 transform -skew-y-3 origin-top-left"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDI0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0xMiAxNmMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHptMCAyNGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
+
+        <div className="relative px-6 sm:px-12 lg:px-20">
+          <div className="max-w-4xl">
+            <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+              Ready to find your perfect student home?
+            </h2>
+            <p className="text-xl text-blue-100 mb-10 leading-relaxed max-w-2xl">
+              Join 10,000+ students who found their ideal housing through
+              CampusNest. Start your search today.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button className="bg-white text-blue-600 px-10 py-5 rounded-xl text-lg font-bold hover:bg-blue-50 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                Browse Properties
+              </button>
+              <button className="border-2 border-white text-white px-10 py-5 rounded-xl text-lg font-bold hover:bg-white/10 transition-all duration-300 hover:scale-105">
                 List Your Property
               </button>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Why Students Choose Us
-            </h2>
-            <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-              Everything you need to find safe, verified housing near campus
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Feature 1 */}
-            <div className="group relative bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-800 p-8 rounded-3xl hover:border-emerald-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/20">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 rounded-3xl transition-all duration-500"></div>
-              
-              <div className="relative z-10">
-                <div className="bg-gradient-to-br from-emerald-500 to-teal-500 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg
-                    className="w-7 h-7 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+          {/* Floating Stats Card */}
+          <div className="absolute bottom-0 right-20 hidden lg:block">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 transform hover:scale-105 transition-all duration-500">
+              <div className="flex gap-8">
+                <div>
+                  <div className="text-4xl font-bold text-white">10K+</div>
+                  <div className="text-blue-100 text-sm">Happy Students</div>
                 </div>
-                
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  Verified Listings
-                </h3>
-                <p className="text-zinc-400 leading-relaxed">
-                  Every property is verified by our team to ensure quality and
-                  safety standards.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="group relative bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-800 p-8 rounded-3xl hover:border-amber-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-amber-500/20">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-amber-500/0 group-hover:from-amber-500/5 group-hover:to-orange-500/5 rounded-3xl transition-all duration-500"></div>
-              
-              <div className="relative z-10">
-                <div className="bg-gradient-to-br from-amber-500 to-orange-500 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg
-                    className="w-7 h-7 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
+                <div>
+                  <div className="text-4xl font-bold text-white">850+</div>
+                  <div className="text-blue-100 text-sm">Properties</div>
                 </div>
-                
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  Secure Payments
-                </h3>
-                <p className="text-zinc-400 leading-relaxed">
-                  Safe payment processing with protection for both students and
-                  landlords.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="group relative bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-800 p-8 rounded-3xl hover:border-violet-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/20">
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/0 to-violet-500/0 group-hover:from-violet-500/5 group-hover:to-purple-500/5 rounded-3xl transition-all duration-500"></div>
-              
-              <div className="relative z-10">
-                <div className="bg-gradient-to-br from-violet-500 to-purple-500 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg
-                    className="w-7 h-7 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </div>
-                
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  Location Search
-                </h3>
-                <p className="text-zinc-400 leading-relaxed">
-                  Find housing within walking distance of your campus with
-                  precise location filters.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="group relative bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-800 p-8 rounded-3xl hover:border-rose-500/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-rose-500/20">
-              <div className="absolute inset-0 bg-gradient-to-br from-rose-500/0 to-rose-500/0 group-hover:from-rose-500/5 group-hover:to-pink-500/5 rounded-3xl transition-all duration-500"></div>
-              
-              <div className="relative z-10">
-                <div className="bg-gradient-to-br from-rose-500 to-pink-500 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg
-                    className="w-7 h-7 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                    />
-                  </svg>
-                </div>
-                
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  Direct Chat
-                </h3>
-                <p className="text-zinc-400 leading-relaxed">
-                  Connect instantly with property owners through our secure
-                  messaging platform.
-                </p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950"></div>
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              How It Works
-            </h2>
-            <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-              Three simple steps to find your perfect student home
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connecting Line */}
-            <div className="hidden md:block absolute top-16 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-emerald-500 via-amber-500 to-violet-500"></div>
-            
-            {/* Step 1 */}
-            <div className="text-center relative">
-              <div className="relative inline-block mb-8">
-                <div className="absolute inset-0 bg-emerald-500 rounded-full blur-xl opacity-50 animate-pulse"></div>
-                <div className="relative bg-gradient-to-br from-emerald-500 to-teal-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg shadow-emerald-500/50">
-                  1
-                </div>
-              </div>
-              
-              <h3 className="text-2xl font-semibold text-white mb-4">
-                Search Near Campus
-              </h3>
-              <p className="text-zinc-400 leading-relaxed">
-                Enter your college name to discover available housing options
-                within your preferred distance.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="text-center relative">
-              <div className="relative inline-block mb-8">
-                <div className="absolute inset-0 bg-amber-500 rounded-full blur-xl opacity-50 animate-pulse delay-300"></div>
-                <div className="relative bg-gradient-to-br from-amber-500 to-orange-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg shadow-amber-500/50">
-                  2
-                </div>
-              </div>
-              
-              <h3 className="text-2xl font-semibold text-white mb-4">
-                Compare Properties
-              </h3>
-              <p className="text-zinc-400 leading-relaxed">
-                Browse verified listings, compare prices, amenities, and read
-                reviews from other students.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="text-center relative">
-              <div className="relative inline-block mb-8">
-                <div className="absolute inset-0 bg-violet-500 rounded-full blur-xl opacity-50 animate-pulse delay-700"></div>
-                <div className="relative bg-gradient-to-br from-violet-500 to-purple-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg shadow-violet-500/50">
-                  3
-                </div>
-              </div>
-              
-              <h3 className="text-2xl font-semibold text-white mb-4">
-                Book & Move In
-              </h3>
-              <p className="text-zinc-400 leading-relaxed">
-                Secure your booking with our safe payment system and move into
-                your new home with confidence.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Call To Action Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDI0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00ek0xMiAxNmMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHptMCAyNGMwLTIuMjEgMS43OS00IDQtNHM0IDEuNzkgNCA0LTEuNzkgNC00IDQtNC0xLjc5LTQtNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
-        
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Find Your Perfect Home?
-          </h2>
-          <p className="text-xl text-emerald-50 mb-10 leading-relaxed">
-            Join thousands of students who have found safe, affordable housing
-            near their campus. Start your search today.
-          </p>
-          
-          <button className="group relative bg-white hover:bg-zinc-100 text-emerald-600 px-12 py-5 rounded-full text-lg font-bold transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-            <span className="relative z-10">Get Started Now</span>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white to-zinc-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          </button>
         </div>
       </section>
     </>
