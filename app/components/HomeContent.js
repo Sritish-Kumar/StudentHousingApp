@@ -97,9 +97,6 @@ export default function HomeContent() {
 
         {/* Right: Featured Property - 40% */}
         <div className="lg:w-[40%] bg-gradient-to-br from-blue-600 to-indigo-700 relative overflow-hidden group rounded-3xl">
-          {/* Pattern Overlay - Ensure this doesn't cover the rounding */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,...')] opacity-30"></div>
-
           <div className="relative h-full flex flex-col justify-end p-8 lg:p-12">
             {/* Badge */}
             <div className="absolute top-8 right-8 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30">

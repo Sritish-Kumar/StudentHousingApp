@@ -1,24 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
+import LoginModal from "./LoginModal";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-  const { user, logout } = useAuth();
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { user, isLoading, logout } = useAuth();
 
-  const handleSwitchToSignup = () => {
-    setShowLoginModal(false);
-    setShowSignupModal(true);
+  const openSignupModal = () => {
+    setIsSignupModalOpen(true);
+    setIsLoginModalOpen(false);
+    setIsMobileMenuOpen(false);
   };
 
-  const handleSwitchToLogin = () => {
-    setShowSignupModal(false);
-    setShowLoginModal(true);
+  const openLoginModal = () => {
+    setIsLoginModalOpen(true);
+    setIsSignupModalOpen(false);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    setIsMobileMenuOpen(false);
+    logout();
   };
 
   return (
@@ -37,44 +44,50 @@ export default function Navbar() {
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
                 <a
-                  href="/"
+                  href="#"
                   className="text-zinc-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
                 >
                   Home
                 </a>
                 <a
-                  href="/map-search"
+                  href="#"
                   className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
                 >
                   Explore
                 </a>
 
-                {user ? (
+                {!isLoading && (
                   <>
-                    <span className="text-zinc-600 px-3 py-2 text-sm font-medium">
-                      Hi, {user.name}
-                    </span>
-                    <button
-                      onClick={logout}
-                      className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setShowLoginModal(true)}
-                      className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
-                    >
-                      Login
-                    </button>
-                    <button
-                      onClick={() => setShowSignupModal(true)}
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50"
-                    >
-                      Sign Up
-                    </button>
+                    {user ? (
+                      // Logged in state
+                      <>
+                        <span className="text-zinc-600 px-3 py-2 text-sm font-medium">
+                          Hi, {user.name}
+                        </span>
+                        <button
+                          onClick={handleLogout}
+                          className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
+                        >
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      // Logged out state
+                      <>
+                        <button
+                          onClick={openLoginModal}
+                          className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
+                        >
+                          Login
+                        </button>
+                        <button
+                          onClick={openSignupModal}
+                          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/50"
+                        >
+                          Sign Up
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -108,44 +121,50 @@ export default function Navbar() {
             <div className="md:hidden pb-4">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 backdrop-blur-xl bg-white/95 rounded-2xl mt-2 shadow-lg border border-gray-200">
                 <a
-                  href="/"
+                  href="#"
                   className="text-zinc-900 block px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
                 >
                   Home
                 </a>
                 <a
-                  href="/map-search"
+                  href="#"
                   className="text-zinc-600 hover:text-blue-600 block px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
                 >
                   Explore
                 </a>
 
-                {user ? (
+                {!isLoading && (
                   <>
-                    <div className="text-zinc-600 block px-4 py-3 text-base font-medium">
-                      Hi, {user.name}
-                    </div>
-                    <button
-                      onClick={logout}
-                      className="text-zinc-600 hover:text-blue-600 block w-full text-left px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setShowLoginModal(true)}
-                      className="text-zinc-600 hover:text-blue-600 block w-full text-left px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
-                    >
-                      Login
-                    </button>
-                    <button
-                      onClick={() => setShowSignupModal(true)}
-                      className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white block w-full text-left px-4 py-3 rounded-xl text-base font-semibold mt-2"
-                    >
-                      Sign Up
-                    </button>
+                    {user ? (
+                      // Logged in state (mobile)
+                      <>
+                        <div className="text-zinc-600 block px-4 py-3 text-base font-medium">
+                          Hi, {user.name}
+                        </div>
+                        <button
+                          onClick={handleLogout}
+                          className="text-zinc-600 hover:text-blue-600 block w-full text-left px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
+                        >
+                          Logout
+                        </button>
+                      </>
+                    ) : (
+                      // Logged out state (mobile)
+                      <>
+                        <button
+                          onClick={openLoginModal}
+                          className="text-zinc-600 hover:text-blue-600 block w-full text-left px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
+                        >
+                          Login
+                        </button>
+                        <button
+                          onClick={openSignupModal}
+                          className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white block w-full text-left px-4 py-3 rounded-xl text-base font-semibold mt-2"
+                        >
+                          Sign Up
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -155,15 +174,15 @@ export default function Navbar() {
       </nav>
 
       {/* Modals */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onSwitchToSignup={handleSwitchToSignup}
-      />
       <SignupModal
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-        onSwitchToLogin={handleSwitchToLogin}
+        isOpen={isSignupModalOpen}
+        onClose={() => setIsSignupModalOpen(false)}
+        onSwitchToLogin={openLoginModal}
+      />
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onSwitchToSignup={openSignupModal}
       />
     </>
   );
