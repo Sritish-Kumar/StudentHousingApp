@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:3000/api";
 let landlordToken = "";
 
 async function signupAndLogin() {
@@ -35,7 +35,7 @@ async function createProperty(title, lat, lng, price) {
             price,
             gender: "UNISEX",
             amenities: ["Wifi", "Map"],
-            location: { lat, lng },
+            location: { lat, lng }, // API will convert to GeoJSON
             college: "Delhi Technology University"
         })
     });
@@ -73,7 +73,7 @@ async function createProperty(title, lat, lng, price) {
         // 5. ~15km West (Should be outside default 10km radius)
         await createProperty("Far West Dorms", centerLat, centerLng - 0.15, 4000);
 
-        console.log("\n✅ Seeding Complete. Open http://localhost:5000/map-search to view.");
+        console.log("\n✅ Seeding Complete. Open http://localhost:3000/map-search to view.");
     } catch (e) {
         console.error(e);
     }

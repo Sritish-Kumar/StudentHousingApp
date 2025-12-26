@@ -68,7 +68,19 @@ export async function PUT(req, { params }) {
         property.price = price || property.price;
         property.gender = gender || property.gender;
         property.amenities = amenities || property.amenities;
-        property.location = location || property.location;
+
+        // Handle location update - convert to GeoJSON if provided
+        if (location) {
+            if (location.lat && location.lng) {
+                property.location = {
+                    type: 'Point',
+                    coordinates: [location.lng, location.lat]
+                };
+            } else {
+                property.location = location;
+            }
+        }
+
         property.college = college || property.college;
 
         await property.save();

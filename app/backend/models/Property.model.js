@@ -28,8 +28,15 @@ const PropertySchema = new mongoose.Schema(
             default: [],
         },
         location: {
-            lat: { type: Number, required: true },
-            lng: { type: Number, required: true },
+            type: {
+                type: String,
+                enum: ['Point'],
+                required: true
+            },
+            coordinates: {
+                type: [Number],
+                required: true
+            }
         },
         college: {
             type: String,
@@ -51,5 +58,8 @@ const PropertySchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+// Add 2dsphere index for geospatial queries
+PropertySchema.index({ location: '2dsphere' });
 
 export default mongoose.models.Property || mongoose.model("Property", PropertySchema);
