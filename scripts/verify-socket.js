@@ -1,6 +1,6 @@
-const io = require("socket.io-client");
+const { io } = require("socket.io-client");
 
-const URL = "http://localhost:5000";
+const URL = "http://localhost:3000";
 const BOOKING_ID = "test-room-101";
 
 console.log("--- Starting Socket.IO Verification ---");

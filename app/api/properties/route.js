@@ -23,14 +23,17 @@ export async function POST(req) {
         // 4. Connect DB
         await connectDB();
 
-        // 5. Create Property
+        // 5. Create Property with GeoJSON location
         const newProperty = await Property.create({
             title,
             description,
             price,
             gender,
             amenities,
-            location,
+            location: {
+                type: 'Point',
+                coordinates: [location.lng, location.lat] // GeoJSON format: [longitude, latitude]
+            },
             college,
             owner: user.id, // from token payload
             verified: false, // Default
