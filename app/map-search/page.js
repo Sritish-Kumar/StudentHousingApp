@@ -1,21 +1,45 @@
 "use client";
 
 import dynamic from "next/dynamic";
-// Dynamic import is crucial for Leaflet in Next.js to avoid "window is not defined" error
-const PropertyMap = dynamic(() => import("../components/PropertyMap"), {
+import Head from "next/head";
+
+// Import maplibre CSS globally
+import "maplibre-gl/dist/maplibre-gl.css";
+
+const Map = dynamic(() => import("../components/Map"), {
     ssr: false,
-    loading: () => <p className="text-center p-10">Loading Map...</p>
+    loading: () => (
+        <div style={{
+            width: "100%",
+            height: "600px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#f5f5f5",
+            fontSize: "18px",
+            color: "#666"
+        }}>
+            Initializing Map...
+        </div>
+    )
 });
 
 export default function MapPage() {
     return (
-        <div className="container mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">Find Properties Nearby</h1>
-            <p className="mb-4 text-gray-600">
-                Explore student housing options near you. Use the slider to adjust the search radius.
-            </p>
+        <>
+            <Head>
+                <title>Map Search | Student Housing</title>
+            </Head>
+            <div style={{ padding: "24px", maxWidth: "1400px", margin: "0 auto" }}>
+                <h1 style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "8px", color: "#1a1a1a" }}>
+                    Find Properties Nearby
+                </h1>
+                <p style={{ marginBottom: "24px", color: "#666" }}>
+                    Explore student housing options near you. Use the map to find your perfect place.
+                </p>
 
-            <PropertyMap />
-        </div>
+                <Map />
+            </div>
+        </>
     );
 }
