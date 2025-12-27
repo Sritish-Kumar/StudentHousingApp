@@ -16,6 +16,7 @@
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^3.3.1",
     "leaflet-routing-machine": "^3.2.12",
+    "maplibre-gl": "^5.15.0",
     "mongoose": "^9.0.2",
     "next": "^14.2.5",
     "next-auth": "^4.24.13",
