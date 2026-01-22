@@ -50,7 +50,7 @@ export default function Navbar() {
                   Home
                 </a>
                 <a
-                  href="#"
+                  href="/explore"
                   className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
                 >
                   Explore
@@ -127,7 +127,7 @@ export default function Navbar() {
                   Home
                 </a>
                 <a
-                  href="#"
+                  href="/explore"
                   className="text-zinc-600 hover:text-blue-600 block px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
                 >
                   Explore

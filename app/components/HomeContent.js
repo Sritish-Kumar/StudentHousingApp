@@ -8,30 +8,30 @@ export default function HomeContent() {
   const properties = [
     {
       id: 1,
-      title: "Modern Studio near MIT",
-      price: "$1,200",
-      distance: "0.3 mi",
+      title: "Modern Studio near IIT",
+      price: "₹12,000",
+      distance: "0.5 km",
       image: "🏢",
     },
     {
       id: 2,
-      title: "Shared 2BR - Harvard Sq",
-      price: "$850",
-      distance: "0.5 mi",
+      title: "Shared 2BR - Near Campus",
+      price: "₹8,500",
+      distance: "0.8 km",
       image: "🏠",
     },
     {
       id: 3,
       title: "Cozy 1BR with Parking",
-      price: "$1,400",
-      distance: "0.8 mi",
+      price: "₹14,000",
+      distance: "1.2 km",
       image: "🏘️",
     },
     {
       id: 4,
       title: "Luxury Apartment",
-      price: "$1,800",
-      distance: "1.2 mi",
+      price: "₹18,000",
+      distance: "2 km",
       image: "🏛️",
     },
   ];
@@ -114,7 +114,7 @@ export default function HomeContent() {
               </p>
               <div className="flex items-center justify-between">
                 <div className="text-3xl font-bold text-white">
-                  $1,200<span className="text-lg text-blue-100">/mo</span>
+                  ₹12,000<span className="text-lg text-blue-100">/mo</span>
                 </div>
                 <button className="bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300">
                   View
@@ -317,7 +317,7 @@ export default function HomeContent() {
                             {amenity}
                           </span>
                         </label>
-                      )
+                      ),
                     )}
                   </div>
                 </div>
