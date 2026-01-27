@@ -4,13 +4,38 @@ import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import FilterSidebar from "../components/FilterSidebar";
 import PropertyCard from "../components/PropertyCard";
+import useDebounce from "../hooks/useDebounce";
 
 export default function ExplorePage() {
   const [properties, setProperties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Fetch Suggestions
+  useEffect(() => {
+    if (debouncedSearch && debouncedSearch.length > 1) {
+      const fetchSuggestions = async () => {
+        try {
+          const res = await fetch(`/api/properties/autocomplete?q=${encodeURIComponent(debouncedSearch)}`);
+          if (res.ok) {
+            const data = await res.json();
+            setSuggestions(data);
+          }
+        } catch (err) {
+          console.error("Suggestion fetch error", err);
+        }
+      };
+      fetchSuggestions();
+    } else {
+      setSuggestions([]);
+    }
+  }, [debouncedSearch]);
 
   const [filters, setFilters] = useState({
     priceMin: null,
@@ -130,13 +155,17 @@ export default function ExplorePage() {
             </p>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="max-w-2xl">
+            <form onSubmit={handleSearch} className="max-w-2xl relative z-10">
               <div className="relative group">
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by college or location..."
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  placeholder="Search by college, title, or keyword..."
                   className="w-full px-6 py-4 text-lg border-2 border-white/20 bg-white/10 backdrop-blur-md rounded-2xl focus:border-white focus:outline-none transition-all duration-300 text-white placeholder-blue-200"
                 />
                 <button
@@ -145,6 +174,41 @@ export default function ExplorePage() {
                 >
                   Search
                 </button>
+
+                {/* Autocomplete Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute top-FULL left-0 w-full mt-2 bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 animate-in fade-in slide-in-from-top-2">
+                    <div className="py-2">
+                      <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                        Suggestions
+                      </div>
+                      {suggestions.map((suggestion) => (
+                        <div
+                          key={suggestion._id}
+                          onClick={() => {
+                            setSearchTerm(suggestion.title);
+                            setShowSuggestions(false);
+                            // Optional: Navigate directly
+                            window.location.href = `/explore/${suggestion._id}`;
+                          }}
+                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between group/item transition-colors"
+                        >
+                          <div>
+                            <div className="font-medium text-gray-900 group-hover/item:text-blue-600">
+                              {suggestion.title}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {suggestion.college}
+                            </div>
+                          </div>
+                          <svg className="w-5 h-5 text-gray-300 group-hover/item:text-blue-500 opacity-0 group-hover/item:opacity-100 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </form>
           </div>
