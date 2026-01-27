@@ -110,7 +110,12 @@ export async function GET(req) {
         const formattedProperties = properties.map((prop) => ({
             id: prop._id,
             title: prop.title,
+            description: prop.description,
             price: prop.price,
+            gender: prop.gender,
+            amenities: prop.amenities,
+            college: prop.college,
+            location: prop.location,
             verified: prop.verified,
             distance: `${prop.distance}km`,
         }));

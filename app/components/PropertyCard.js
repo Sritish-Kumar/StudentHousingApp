@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function PropertyCard({ property }) {
   const {
     id,
@@ -29,7 +31,10 @@ export default function PropertyCard({ property }) {
   const displayAmenities = amenities.slice(0, 3);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-blue-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer group">
+    <Link
+      href={`/explore/${id}`}
+      className="block bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-blue-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer group"
+    >
       {/* Property Image Placeholder */}
       <div className="relative bg-gradient-to-br from-blue-100 to-indigo-100 h-48 flex items-center justify-center overflow-hidden">
         <div className="text-6xl group-hover:scale-110 transition-transform duration-500">
@@ -138,11 +143,11 @@ export default function PropertyCard({ property }) {
               <span className="text-sm text-zinc-600 font-normal">/mo</span>
             </div>
           </div>
-          <button className="opacity-0 group-hover:opacity-100 bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all duration-300">
+          <div className="opacity-0 group-hover:opacity-100 bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all duration-300">
             View Details
-          </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
