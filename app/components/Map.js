@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import "maplibre-gl/dist/maplibre-gl.css";
 import SearchBar from "./SearchBar";
 
-export default function Map() {
+export default function Map({ onLocationSelect, selectedLocation }) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const userMarker = useRef(null);
     const destMarker = useRef(null);
+    const selectedMarker = useRef(null);
 
     const [mapLoaded, setMapLoaded] = useState(false);
     const [userLocation, setUserLocation] = useState(null);
@@ -45,6 +47,14 @@ export default function Map() {
                 setMapLoaded(true);
             });
 
+            // Handle Map Click for Selection
+            map.current.on('click', (e) => {
+                if (onLocationSelect) {
+                    const { lng, lat } = e.lngLat;
+                    onLocationSelect({ lng, lat });
+                }
+            });
+
             // Add zoom controls
             map.current.addControl(new maplibregl.NavigationControl(), 'bottom-right');
         });
@@ -53,6 +63,33 @@ export default function Map() {
             if (map.current) map.current.remove();
         };
     }, []);
+
+    // Handle Selected Location Prop Updates
+    useEffect(() => {
+        if (!mapLoaded || !map.current || !selectedLocation) return;
+
+        import('maplibre-gl').then((module) => {
+            const maplibregl = module.default;
+            const { lng, lat } = selectedLocation;
+
+            if (selectedMarker.current) {
+                selectedMarker.current.setLngLat([lng, lat]);
+            } else {
+                selectedMarker.current = new maplibregl.Marker({ color: "#ef4444", draggable: true })
+                    .setLngLat([lng, lat])
+                    .addTo(map.current);
+
+                selectedMarker.current.on('dragend', () => {
+                    const { lng, lat } = selectedMarker.current.getLngLat();
+                    if (onLocationSelect) onLocationSelect({ lng, lat });
+                });
+            }
+
+            // Fly to location if it's new
+            map.current.flyTo({ center: [lng, lat], zoom: 15 });
+        });
+    }, [mapLoaded, selectedLocation]);
+
 
     // Live Location Tracking
     useEffect(() => {
@@ -72,18 +109,22 @@ export default function Map() {
                         const el = document.createElement('div');
                         el.style.width = '20px';
                         el.style.height = '20px';
-                        el.style.backgroundColor = '#3b82f6';
+                        el.style.backgroundColor = '#ef4444'; // Red to match the "red rogo" request
                         el.style.border = '3px solid white';
                         el.style.borderRadius = '50%';
-                        el.style.boxShadow = '0 0 0 rgba(59, 130, 246, 0.4)';
+                        el.style.boxShadow = '0 0 0 rgba(239, 68, 68, 0.4)';
                         el.style.animation = 'pulse 2s infinite';
+                        el.style.cursor = 'pointer';
 
                         userMarker.current = new maplibregl.Marker({ element: el })
                             .setLngLat([lng, lat])
                             .addTo(map.current);
 
-                        // Fly to user location once
-                        map.current.flyTo({ center: [lng, lat], zoom: 14 });
+                        // Clicking user location also selects it
+                        el.addEventListener('click', () => {
+                            if (onLocationSelect) onLocationSelect({ lng, lat });
+                        });
+
                     } else {
                         userMarker.current.setLngLat([lng, lat]);
                     }
@@ -152,40 +193,67 @@ export default function Map() {
         }
     };
 
-    // Handle place selection
+    // Handle place selection from SearchBar
     const onPlaceSelect = async (place) => {
         const [lng, lat] = place.geometry.coordinates;
 
-        const maplibregl = (await import('maplibre-gl')).default;
-
-        // Remove old destination marker
-        if (destMarker.current) {
-            destMarker.current.remove();
-        }
-
-        // Add new destination marker
-        destMarker.current = new maplibregl.Marker({ color: "#ef4444" })
-            .setLngLat([lng, lat])
-            .setPopup(new maplibregl.Popup({ offset: 25 }).setText(place.name))
-            .addTo(map.current)
-            .togglePopup();
-
-        // Draw route if user location exists
-        if (userLocation) {
-            drawRoute(userLocation, [lng, lat]);
-        } else {
-            map.current.flyTo({ center: [lng, lat], zoom: 14 });
+        // Update parent state
+        if (onLocationSelect) {
+            onLocationSelect({ lng, lat });
         }
     };
 
+    const [isLocating, setIsLocating] = useState(false);
+
     const recenterUser = () => {
+        setIsLocating(true);
         if (userLocation && map.current) {
-            map.current.flyTo({ center: userLocation, zoom: 15 });
+            map.current.flyTo({
+                center: userLocation,
+                zoom: 16,
+                speed: 0.8,
+                curve: 1,
+                essential: true
+            });
+
+            // Also select this location if the parent needs it
+            if (onLocationSelect) {
+                onLocationSelect({ lng: userLocation[0], lat: userLocation[1] });
+            }
+            setIsLocating(false);
+        } else {
+            // Trigger native request if not yet found
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const { longitude, latitude } = pos.coords;
+                        setUserLocation([longitude, latitude]);
+
+                        // Wait slightly for map ref to be safe or just use it
+                        if (map.current) {
+                            map.current.flyTo({ center: [longitude, latitude], zoom: 16 });
+                        }
+
+                        // Manually update marker if it doesn't exist yet via watchPosition
+                        // This ensures "not showing the pin" is addressed
+                        if (onLocationSelect) onLocationSelect({ lng: longitude, lat: latitude });
+                        setIsLocating(false);
+                    },
+                    (error) => {
+                        console.error("Error getting location", error);
+                        alert("Could not access your location. Please check browser permissions.");
+                        setIsLocating(false);
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                setIsLocating(false);
+            }
         }
     };
 
     return (
-        <div style={{ position: "relative", width: "100%", height: "600px", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+        <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
 
             <SearchBar onSelect={onPlaceSelect} />
 
@@ -217,7 +285,9 @@ export default function Map() {
 
             {/* Locate Me Button */}
             <button
+                type="button"
                 onClick={recenterUser}
+                disabled={isLocating}
                 style={{
                     position: "absolute",
                     bottom: "20px",
@@ -235,7 +305,8 @@ export default function Map() {
                     fontWeight: 600,
                     fontSize: "14px",
                     cursor: "pointer",
-                    transition: "all 0.2s"
+                    transition: "all 0.2s",
+                    opacity: isLocating ? 0.7 : 1
                 }}
                 onMouseEnter={(e) => {
                     e.target.style.backgroundColor = "#f8f8f8";
@@ -246,11 +317,15 @@ export default function Map() {
                     e.target.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
                 }}
             >
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Locate Me</span>
+                {isLocating ? (
+                    <div style={{ width: "20px", height: "20px", border: "2px solid #ccc", borderTopColor: "#333", borderRadius: "50%", animation: "spin 1s linear infinite" }}></div>
+                ) : (
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                )}
+                <span>{isLocating ? "Locating..." : "Locate Me"}</span>
             </button>
 
             <div ref={mapContainer} style={{ width: "100%", height: "100%" }} />
@@ -258,11 +333,15 @@ export default function Map() {
             <style jsx global>{`
                 @keyframes pulse {
                     0%, 100% {
-                        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+                        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
                     }
                     50% {
-                        box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);
+                        box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
                     }
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
                 }
             `}</style>
         </div>

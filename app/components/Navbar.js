@@ -52,12 +52,26 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
-                <Link
-                  href="/explore"
-                  className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
-                >
-                  Explore
-                </Link>
+
+                {/* Show Explore for non-logged in or Students */}
+                {(!user || user.role !== "LANDLORD") && (
+                  <Link
+                    href="/explore"
+                    className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    Explore
+                  </Link>
+                )}
+
+                {/* Show Dashboard for Landlords */}
+                {user && user.role === "LANDLORD" && (
+                  <Link
+                    href="/landlord/dashboard"
+                    className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
+                  >
+                    Dashboard
+                  </Link>
+                )}
 
                 {!isLoading && (
                   <>
@@ -132,13 +146,26 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
-                <Link
-                  href="/explore"
-                  className="text-zinc-600 hover:text-blue-600 block px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Explore
-                </Link>
+
+                {(!user || user.role !== "LANDLORD") && (
+                  <Link
+                    href="/explore"
+                    className="text-zinc-600 hover:text-blue-600 block px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Explore
+                  </Link>
+                )}
+
+                {user && user.role === "LANDLORD" && (
+                  <Link
+                    href="/landlord/dashboard"
+                    className="text-zinc-600 hover:text-blue-600 block px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                )}
 
                 {!isLoading && (
                   <>
