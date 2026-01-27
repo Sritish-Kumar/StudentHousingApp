@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import SignupModal from "./SignupModal";
 import LoginModal from "./LoginModal";
@@ -35,26 +36,28 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                CampusNest
-              </h1>
+              <Link href="/">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer">
+                  CampusNest
+                </h1>
+              </Link>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
-                <a
-                  href="#"
+                <Link
+                  href="/"
                   className="text-zinc-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
                 >
                   Home
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/explore"
                   className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
                 >
                   Explore
-                </a>
+                </Link>
 
                 {!isLoading && (
                   <>
@@ -97,6 +100,8 @@ export default function Navbar() {
             <div className="md:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle mobile menu"
+                aria-expanded={isMobileMenuOpen}
                 className="text-zinc-600 hover:text-blue-600 focus:outline-none transition-colors"
               >
                 <svg
@@ -120,18 +125,20 @@ export default function Navbar() {
           {isMobileMenuOpen && (
             <div className="md:hidden pb-4">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 backdrop-blur-xl bg-white/95 rounded-2xl mt-2 shadow-lg border border-gray-200">
-                <a
-                  href="#"
+                <Link
+                  href="/"
                   className="text-zinc-900 block px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Home
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/explore"
                   className="text-zinc-600 hover:text-blue-600 block px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Explore
-                </a>
+                </Link>
 
                 {!isLoading && (
                   <>
