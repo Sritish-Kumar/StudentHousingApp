@@ -5,9 +5,9 @@ import { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext({
   user: null,
   isLoading: true,
-  login: () => {},
-  logout: () => {},
-  refreshUser: () => {},
+  login: () => { },
+  logout: () => { },
+  refreshUser: () => { },
 });
 
 export function AuthProvider({ children }) {
@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
       setUser(null);
-      window.location.reload();
+      window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
     }
