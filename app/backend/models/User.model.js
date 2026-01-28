@@ -11,14 +11,25 @@ const UserSchema = new mongoose.Schema(
       enum: ["STUDENT", "LANDLORD", "ADMIN"],
       default: "STUDENT",
     },
-    wishlist: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Property",
-      default: [],
-    }],
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Property",
+        default: [],
+      },
+    ],
+    suspended: {
+      type: Boolean,
+      default: false,
+    },
+    suspendedAt: {
+      type: Date,
+    },
+    suspensionReason: {
+      type: String,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export default mongoose.models.User ||
-  mongoose.model("User", UserSchema);
+export default mongoose.models.User || mongoose.model("User", UserSchema);

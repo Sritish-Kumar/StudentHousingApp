@@ -61,6 +61,19 @@ const PropertySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    verifiedAt: {
+      type: Date,
+    },
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    rejectedAt: {
+      type: Date,
+    },
+    rejectionReason: {
+      type: String,
+    },
     distance: {
       type: Number,
       default: 0,

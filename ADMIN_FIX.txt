@@ -1,0 +1,29 @@
+// Quick Fix for Admin Pages - Add this to all fetch calls
+
+// In app/admin/page.js - Line 18
+const res = await fetch("/api/admin/stats", {
+  credentials: 'include',
+});
+
+// In app/admin/properties/page.js - Already fixed ✅
+
+// In app/admin/users/page.js - Line 27
+const res = await fetch(`/api/admin/users?${params.toString()}`, {
+  credentials: 'include',
+});
+
+// In app/admin/users/page.js - Line 42
+const res = await fetch(`/api/admin/users/${userId}/suspend`, {
+  method: "POST",
+  credentials: 'include',
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ reason }),
+});
+
+// In app/admin/users/page.js - Line 58
+const res = await fetch(`/api/admin/users/${userId}/suspend`, {
+  method: "POST",
+  credentials: 'include',
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ reason: "" }),
+});
