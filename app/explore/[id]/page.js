@@ -158,11 +158,10 @@ export default function PropertyDetailPage() {
                           <button
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
-                            className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${
-                              currentImageIndex === index
+                            className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${currentImageIndex === index
                                 ? "ring-4 ring-blue-500 scale-105"
                                 : "opacity-60 hover:opacity-100"
-                            }`}
+                              }`}
                           >
                             <img
                               src={image}
@@ -283,6 +282,39 @@ export default function PropertyDetailPage() {
                     </p>
                   </div>
 
+                  {/* Address */}
+                  {property.address && (
+                    <div>
+                      <h3 className="text-xl font-bold text-zinc-900 mb-4">
+                        Address
+                      </h3>
+                      <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <svg
+                          className="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        <p className="text-zinc-700 leading-relaxed text-lg">
+                          {property.address}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Amenities */}
                   {property.amenities?.length > 0 && (
                     <div>
@@ -331,7 +363,7 @@ export default function PropertyDetailPage() {
                   {/* Map Preview */}
                   <div className="rounded-2xl overflow-hidden border border-gray-200 h-64 shadow-md bg-gray-100 relative">
                     {property.location?.coordinates &&
-                    property.location.coordinates.length === 2 ? (
+                      property.location.coordinates.length === 2 ? (
                       <PropertyMap
                         coordinates={property.location.coordinates}
                         title={property.title}

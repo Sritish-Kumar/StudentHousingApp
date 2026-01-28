@@ -14,6 +14,7 @@ export default function CreatePropertyPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    address: "",
     price: "",
     gender: "UNISEX",
     amenities: "",
@@ -135,6 +136,27 @@ export default function CreatePropertyPage() {
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                   required
                 />
+              </div>
+
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-bold text-zinc-700 mb-2">
+                  Property Address
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Enter complete address (Street, Area, City, Pincode)"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  required
+                  minLength={10}
+                  maxLength={200}
+                />
+                <p className="mt-1 text-xs text-zinc-500">
+                  Minimum 10 characters, maximum 200 characters
+                </p>
               </div>
 
               {/* Price & College */}

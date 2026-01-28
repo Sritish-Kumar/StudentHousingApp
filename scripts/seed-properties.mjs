@@ -86,6 +86,7 @@ const mockProperties = [
     title: "Modern Studio Apartment near DU",
     description:
       "Fully furnished studio apartment with modern amenities, perfect for students. Located just 5 minutes walk from Delhi University North Campus. Includes 24/7 security, power backup, and high-speed WiFi.",
+    address: "23, Kamla Nagar, Near North Campus, Delhi University, Delhi - 110007",
     price: 12000,
     gender: "UNISEX",
     amenities: ["WiFi", "AC", "Furnished", "Power Backup", "Security"],
@@ -104,6 +105,7 @@ const mockProperties = [
     title: "Spacious 2BHK for Female Students",
     description:
       "Safe and secure accommodation for female students near IIT Delhi. Includes separate kitchen, attached bathrooms, and common study area. Mess facility available.",
+    address: "45, Hauz Khas Village, Near IIT Delhi Main Gate, New Delhi - 110016",
     price: 18000,
     gender: "FEMALE",
     amenities: ["WiFi", "Mess", "Laundry", "Study Room", "CCTV", "Gym"],
@@ -123,6 +125,7 @@ const mockProperties = [
     title: "Budget-Friendly PG for Boys",
     description:
       "Affordable paying guest accommodation near Jamia Millia Islamia. Triple sharing rooms with basic amenities. Ideal for budget-conscious students.",
+    address: "12, Okhla Road, Jamia Nagar, Near Jamia Millia Islamia, New Delhi - 110025",
     price: 7500,
     gender: "MALE",
     amenities: ["WiFi", "Meals", "Laundry", "Hot Water"],
@@ -140,6 +143,7 @@ const mockProperties = [
     title: "Luxury 3BHK Apartment - JNU",
     description:
       "Premium fully furnished 3BHK apartment near Jawaharlal Nehru University. Perfect for group of 4-5 students. Includes modular kitchen, balcony, and parking space.",
+    address: "78, Munirka Village, Near JNU West Gate, New Delhi - 110067",
     price: 35000,
     gender: "UNISEX",
     amenities: [
@@ -168,6 +172,7 @@ const mockProperties = [
     title: "Cozy Single Room - AIIMS",
     description:
       "Single occupancy room for medical students near AIIMS Delhi. Quiet environment, perfect for studies. Includes attached bathroom and study table.",
+    address: "34, Ansari Nagar East, Near AIIMS Main Gate, New Delhi - 110029",
     price: 15000,
     gender: "UNISEX",
     amenities: ["WiFi", "AC", "Attached Bathroom", "Study Table", "Wardrobe"],
@@ -186,6 +191,7 @@ const mockProperties = [
     title: "Girls Hostel - DTU",
     description:
       "Safe and comfortable girls hostel near Delhi Technological University. Includes mess, common room, and 24/7 security with CCTV surveillance.",
+    address: "56, Rohini Sector 18, Near DTU Campus, Delhi - 110042",
     price: 10000,
     gender: "FEMALE",
     amenities: [
@@ -210,6 +216,7 @@ const mockProperties = [
     title: "Shared Apartment - Amity University",
     description:
       "Well-maintained shared apartment for 3 students near Amity University Noida. Spacious rooms with modern furnishings and all essential amenities.",
+    address: "89, Sector 125, Near Amity University, Noida, Uttar Pradesh - 201303",
     price: 9000,
     gender: "MALE",
     amenities: [
@@ -234,6 +241,7 @@ const mockProperties = [
     title: "Premium Studio - Shiv Nadar University",
     description:
       "Brand new premium studio apartment near Shiv Nadar University. Fully automated with smart home features, gym access, and swimming pool.",
+    address: "101, Knowledge Park III, Greater Noida, Near Shiv Nadar University, UP - 201308",
     price: 25000,
     gender: "UNISEX",
     amenities: [

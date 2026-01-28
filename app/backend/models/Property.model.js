@@ -13,6 +13,13 @@ const PropertySchema = new mongoose.Schema(
       required: [true, "Description is required"],
       maxlength: [1000, "Description cannot be more than 1000 characters"],
     },
+    address: {
+      type: String,
+      required: [true, "Address is required"],
+      trim: true,
+      minlength: [10, "Address must be at least 10 characters"],
+      maxlength: [200, "Address must not exceed 200 characters"],
+    },
     price: {
       type: Number,
       required: [true, "Price is required"],
@@ -85,5 +92,9 @@ const PropertySchema = new mongoose.Schema(
 // Add 2dsphere index for geospatial queries
 PropertySchema.index({ location: "2dsphere" });
 
-export default mongoose.models.Property ||
-  mongoose.model("Property", PropertySchema);
+// Force recompilation of model to ensure new fields are picked up
+if (mongoose.models.Property) {
+  delete mongoose.models.Property;
+}
+
+export default mongoose.model("Property", PropertySchema);

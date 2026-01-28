@@ -57,6 +57,7 @@ export async function PUT(req, { params }) {
     const {
       title,
       description,
+      address,
       price,
       gender,
       amenities,
@@ -65,15 +66,21 @@ export async function PUT(req, { params }) {
       images,
     } = body;
 
-    // Update basic fields if provided
-    if (title) property.title = title;
-    if (description) property.description = description;
-    if (price) property.price = price;
-    if (gender) property.gender = gender;
-    if (amenities) property.amenities = amenities;
-    if (college) property.college = college;
+    // Debug logging
+    console.log('PUT /api/properties/[id] - Received address:', address);
+    console.log('PUT /api/properties/[id] - Current property address:', property.address);
 
-    // Update images if provided
+    // Construct update object
+    const updateData = {};
+    if (title) updateData.title = title;
+    if (description) updateData.description = description;
+    if (address !== undefined) updateData.address = address;
+    if (price) updateData.price = price;
+    if (gender) updateData.gender = gender;
+    if (amenities) updateData.amenities = amenities;
+    if (college) updateData.college = college;
+
+    // Explicitly handle images array checks before update
     if (images !== undefined) {
       if (!Array.isArray(images) || images.length > 10) {
         return NextResponse.json(
@@ -81,23 +88,34 @@ export async function PUT(req, { params }) {
           { status: 400 },
         );
       }
-      property.images = images;
+      updateData.images = images;
     }
 
-    // Update location if provided
-    if (location) {
-      property.location = {
+    if (location && location.lat && location.lng) {
+      updateData.location = {
         type: "Point",
         coordinates: [location.lng, location.lat],
       };
     }
 
-    // Reset verification status on edit? usually good practice, but keeping simple for now.
-    // property.verified = false;
+    console.log('PUT /api/properties/[id] - Update payload:', JSON.stringify(updateData, null, 2));
 
-    await property.save();
+    const updatedProperty = await Property.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
 
-    return NextResponse.json(property, { status: 200 });
+    if (!updatedProperty) {
+      return NextResponse.json({ message: "Property not found" }, { status: 404 });
+    }
+
+    console.log('PUT /api/properties/[id] - Successfully updated property. New address:', updatedProperty.address);
+
+    return NextResponse.json(
+      { message: "Property updated successfully", property: updatedProperty },
+      { status: 200 },
+    );
   } catch (error) {
     console.error("PUT /api/properties/[id] error:", error);
     return NextResponse.json(
