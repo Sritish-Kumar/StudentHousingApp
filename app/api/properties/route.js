@@ -123,23 +123,35 @@ export async function GET(req) {
         }
 
         // When using $near, results are automatically sorted by distance
-        const properties = lat && lng
-            ? await Property.find(query)
-            : await Property.find(query).sort({ createdAt: -1 });
+        const properties =
+            lat && lng
+                ? await Property.find(query)
+                : await Property.find(query).sort({ createdAt: -1 });
 
         const formattedProperties = properties.map((prop) => {
             // Calculate distance if coordinates provided
             let calculatedDistance = prop.distance;
 
-            if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng)) && prop.location && prop.location.coordinates) {
+            if (
+                lat &&
+                lng &&
+                !isNaN(parseFloat(lat)) &&
+                !isNaN(parseFloat(lng)) &&
+                prop.location &&
+                prop.location.coordinates
+            ) {
                 // Haversine formula for accurate distance calculation
                 const R = 6371; // Earth's radius in km
-                const dLat = (prop.location.coordinates[1] - parseFloat(lat)) * Math.PI / 180;
-                const dLon = (prop.location.coordinates[0] - parseFloat(lng)) * Math.PI / 180;
+                const dLat =
+                    (prop.location.coordinates[1] - parseFloat(lat)) * (Math.PI / 180);
+                const dLon =
+                    (prop.location.coordinates[0] - parseFloat(lng)) * (Math.PI / 180);
                 const a =
                     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                    Math.cos(parseFloat(lat) * Math.PI / 180) * Math.cos(prop.location.coordinates[1] * Math.PI / 180) *
-                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                    Math.cos(parseFloat(lat) * (Math.PI / 180)) *
+                    Math.cos(prop.location.coordinates[1] * (Math.PI / 180)) *
+                    Math.sin(dLon / 2) *
+                    Math.sin(dLon / 2);
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                 calculatedDistance = (R * c).toFixed(1); // Distance in km with 1 decimal
             }
@@ -151,6 +163,7 @@ export async function GET(req) {
                 price: prop.price,
                 gender: prop.gender,
                 amenities: prop.amenities,
+                images: prop.images,
                 college: prop.college,
                 location: prop.location,
                 verified: prop.verified,
@@ -163,7 +176,7 @@ export async function GET(req) {
         console.error("GET /api/properties error:", error);
         return NextResponse.json(
             { message: "Internal Server Error" },
-            { status: 500 }
+            { status: 500 },
         );
     }
 }
