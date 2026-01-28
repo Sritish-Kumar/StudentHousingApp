@@ -123,45 +123,28 @@ export default function AdminSidebar() {
                     transform transition-transform duration-300 ease-in-out
                     lg:transform-none
                     ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-                    flex flex-col min-h-screen
+                    flex flex-col h-screen overflow-y-auto
                 `}
       >
-        <div className="p-6 flex-shrink-0">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Admin Panel</h2>
-            <p className="text-sm text-gray-500 mt-1">Manage your platform</p>
-          </div>
-
-          <nav className="space-y-2">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
-                    isActive
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {item.icon}
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
+        {/* Header */}
+        <div className="p-4 sm:p-6 shrink-0 border-b border-gray-100">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Admin Panel
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Manage your platform
+          </p>
         </div>
 
-        <div className="mt-auto p-6 border-t border-gray-200 flex-shrink-0">
+        {/* Back to Site Button - Moved to Top */}
+        <div className="p-4 sm:p-6 shrink-0 border-b border-gray-100">
           <Link
             href="/"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-all"
+            className="flex items-center gap-3 px-3 sm:px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-all min-h-[44px]"
           >
             <svg
-              className="w-5 h-5"
+              className="w-5 h-5 shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -173,9 +156,31 @@ export default function AdminSidebar() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            <span>Back to Site</span>
+            <span className="text-sm sm:text-base">Back to Site</span>
           </Link>
         </div>
+
+        {/* Navigation */}
+        <nav className="p-4 sm:p-6 space-y-2 flex-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-3 sm:px-4 py-3 rounded-xl font-medium transition-all min-h-[44px] ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <span className="shrink-0">{item.icon}</span>
+                <span className="text-sm sm:text-base">{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </aside>
     </>
   );

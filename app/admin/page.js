@@ -37,9 +37,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome to the admin panel</p>
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+          Dashboard
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-2">
+          Welcome to the admin panel
+        </p>
       </div>
 
       {/* Statistics Grid */}
@@ -206,21 +210,21 @@ export default function AdminDashboard() {
           {stats?.recentActivity?.map((property) => (
             <div
               key={property.id}
-              className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
             >
-              <div className="flex-1">
-                <h4 className="font-semibold text-gray-900">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
                   {property.title}
                 </h4>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">
                   by {property.owner?.name} ({property.owner?.email})
                 </p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                 <StatusBadge
                   status={property.verified ? "verified" : "pending"}
                 />
-                <span className="text-sm text-gray-500">
+                <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                   {new Date(property.createdAt).toLocaleDateString()}
                 </span>
               </div>
