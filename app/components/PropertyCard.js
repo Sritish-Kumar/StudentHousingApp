@@ -13,6 +13,7 @@ export default function PropertyCard({ property }) {
     amenities = [],
     gender,
     college,
+    images = [],
   } = property;
 
   // Format price in INR
@@ -35,11 +36,21 @@ export default function PropertyCard({ property }) {
       href={`/explore/${id}`}
       className="block bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-blue-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer group"
     >
-      {/* Property Image Placeholder */}
-      <div className="relative bg-gradient-to-br from-blue-100 to-indigo-100 h-48 flex items-center justify-center overflow-hidden">
-        <div className="text-6xl group-hover:scale-110 transition-transform duration-500">
-          🏠
-        </div>
+      {/* Property Image */}
+      <div className="relative bg-gradient-to-br from-blue-100 to-indigo-100 h-48 overflow-hidden">
+        {images.length > 0 ? (
+          <img
+            src={images[0]}
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-6xl group-hover:scale-110 transition-transform duration-500">
+              🏠
+            </div>
+          </div>
+        )}
 
         {/* Verified Badge */}
         {verified && (
@@ -61,6 +72,20 @@ export default function PropertyCard({ property }) {
             {gender === "UNISEX"
               ? "Co-ed"
               : gender.charAt(0) + gender.slice(1).toLowerCase()}
+          </div>
+        )}
+
+        {/* Image Count Badge */}
+        {images.length > 1 && (
+          <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1">
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                clipRule="evenodd"
+              />
+            </svg>
+            {images.length}
           </div>
         )}
       </div>
