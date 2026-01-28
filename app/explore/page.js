@@ -46,13 +46,18 @@ export default function ExplorePage() {
     verified: true, // Default to showing only verified properties
   });
 
+  const [userLocation, setUserLocation] = useState(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState(null);
+
   // Fetch properties from API
   useEffect(() => {
     fetchProperties();
-  }, [filters, sortBy]);
+  }, [filters, sortBy, userLocation]);
 
   const fetchProperties = async () => {
     setIsLoading(true);
+    setLocationError(null);
     try {
       // Build query params
       const params = new URLSearchParams();
@@ -65,13 +70,22 @@ export default function ExplorePage() {
       params.append("verified", filters.verified ? "true" : "false");
       if (searchTerm) params.append("college", searchTerm);
 
+      // Add geolocation params if user location is available
+      if (userLocation) {
+        params.append("lat", userLocation.lat);
+        params.append("lng", userLocation.lng);
+        // No radius - we want ALL properties sorted by distance
+      }
+
       const response = await fetch(`/api/properties?${params.toString()}`);
 
       if (response.ok) {
         let data = await response.json();
 
-        // Apply client-side sorting
-        data = sortProperties(data, sortBy);
+        // Apply client-side sorting only if NOT using geolocation (API auto-sorts by distance)
+        if (!userLocation) {
+          data = sortProperties(data, sortBy);
+        }
 
         setProperties(data);
       } else {
@@ -84,6 +98,53 @@ export default function ExplorePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleNearbyMe = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsLocating(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserLocation(location);
+        setIsLocating(false);
+        // Clear search term when using location to avoid conflicts
+        setSearchTerm("");
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        let errorMessage = "Unable to retrieve your location.";
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location permission denied. Please enable location access in your browser settings.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out.";
+            break;
+        }
+
+        setLocationError(errorMessage);
+        setIsLocating(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const sortProperties = (props, sort) => {
@@ -268,6 +329,11 @@ export default function ExplorePage() {
                     onFilterChange={handleFilterChange}
                     onClearFilters={handleClearFilters}
                     activeFilterCount={activeFilterCount}
+                    userLocation={userLocation}
+                    isLocating={isLocating}
+                    locationError={locationError}
+                    onNearbyMe={handleNearbyMe}
+                    onClearLocation={() => setUserLocation(null)}
                   />
                 </div>
               )}
@@ -277,9 +343,14 @@ export default function ExplorePage() {
             <aside className="hidden lg:block lg:w-80 flex-shrink-0">
               <FilterSidebar
                 filters={filters}
-                onFilterChange={handleFilterChange}
+                onFilterChange={setFilters}
                 onClearFilters={handleClearFilters}
                 activeFilterCount={activeFilterCount}
+                userLocation={userLocation}
+                isLocating={isLocating}
+                locationError={locationError}
+                onNearbyMe={handleNearbyMe}
+                onClearLocation={() => setUserLocation(null)}
               />
             </aside>
 

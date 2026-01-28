@@ -5,6 +5,11 @@ export default function FilterSidebar({
   onFilterChange,
   onClearFilters,
   activeFilterCount,
+  userLocation,
+  isLocating,
+  locationError,
+  onNearbyMe,
+  onClearLocation,
 }) {
   const priceRanges = [
     { label: "₹5K-₹10K", min: 5000, max: 10000 },
@@ -119,12 +124,11 @@ export default function FilterSidebar({
               <button
                 key={range.label}
                 onClick={() => handlePriceChange(range)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  filters.priceMin === range.min &&
-                  filters.priceMax === range.max
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${filters.priceMin === range.min &&
+                    filters.priceMax === range.max
                     ? "bg-blue-600 text-white shadow-lg"
                     : "bg-gray-100 text-zinc-700 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {range.label}
               </button>
@@ -227,6 +231,64 @@ export default function FilterSidebar({
               </span>
             </div>
           </label>
+        </div>
+
+        {/* Nearby Me */}
+        <div className="border-t border-gray-200 pt-6">
+          <label className="text-sm font-semibold text-zinc-700 mb-3 block">
+            Location-Based Search
+          </label>
+          <button
+            type="button"
+            onClick={onNearbyMe}
+            disabled={isLocating}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-300 ${isLocating
+                ? "bg-gray-100 cursor-not-allowed text-gray-400"
+                : userLocation
+                  ? "bg-green-500 hover:bg-green-600 text-white shadow-md"
+                  : "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+              }`}
+          >
+            {isLocating ? (
+              <>
+                <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                <span>Locating...</span>
+              </>
+            ) : userLocation ? (
+              <>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>Sorted by Distance</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Find Nearby Me</span>
+              </>
+            )}
+          </button>
+
+          {/* Error Message */}
+          {locationError && (
+            <div className="mt-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg text-xs text-center">
+              {locationError}
+            </div>
+          )}
+
+          {/* Clear Location Button */}
+          {userLocation && !isLocating && (
+            <button
+              type="button"
+              onClick={onClearLocation}
+              className="w-full mt-2 text-sm text-zinc-600 hover:text-zinc-900 underline"
+            >
+              Clear location sorting
+            </button>
+          )}
         </div>
       </div>
     </div>

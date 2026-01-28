@@ -73,8 +73,25 @@ export async function GET(req) {
         const verified = searchParams.get("verified");
         const distance = searchParams.get("distance");
         const college = searchParams.get("college");
+        const lat = searchParams.get("lat");
+        const lng = searchParams.get("lng");
+        const radius = searchParams.get("radius"); // in meters
 
         const query = {};
+
+        // Geospatial Search (Priority 1 - if coordinates provided)
+        // This will sort ALL properties by distance, not filter them
+        if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
+            query.location = {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: [parseFloat(lng), parseFloat(lat)],
+                    },
+                    // No $maxDistance - show ALL properties sorted by distance
+                },
+            };
+        }
 
         // Filter by Price
         if (priceMin || priceMax) {
@@ -100,25 +117,46 @@ export async function GET(req) {
             query.college = { $regex: college, $options: "i" };
         }
 
-        // Filter by Distance (Simple numeric filter on 'distance' field)
-        if (distance) {
+        // Filter by Distance (Only if not using geospatial search)
+        if (distance && !lat) {
             query.distance = { $lte: Number(distance) };
         }
 
-        const properties = await Property.find(query).sort({ createdAt: -1 });
+        // When using $near, results are automatically sorted by distance
+        const properties = lat && lng
+            ? await Property.find(query)
+            : await Property.find(query).sort({ createdAt: -1 });
 
-        const formattedProperties = properties.map((prop) => ({
-            id: prop._id,
-            title: prop.title,
-            description: prop.description,
-            price: prop.price,
-            gender: prop.gender,
-            amenities: prop.amenities,
-            college: prop.college,
-            location: prop.location,
-            verified: prop.verified,
-            distance: `${prop.distance}km`,
-        }));
+        const formattedProperties = properties.map((prop) => {
+            // Calculate distance if coordinates provided
+            let calculatedDistance = prop.distance;
+
+            if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng)) && prop.location && prop.location.coordinates) {
+                // Haversine formula for accurate distance calculation
+                const R = 6371; // Earth's radius in km
+                const dLat = (prop.location.coordinates[1] - parseFloat(lat)) * Math.PI / 180;
+                const dLon = (prop.location.coordinates[0] - parseFloat(lng)) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(parseFloat(lat) * Math.PI / 180) * Math.cos(prop.location.coordinates[1] * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                calculatedDistance = (R * c).toFixed(1); // Distance in km with 1 decimal
+            }
+
+            return {
+                id: prop._id,
+                title: prop.title,
+                description: prop.description,
+                price: prop.price,
+                gender: prop.gender,
+                amenities: prop.amenities,
+                college: prop.college,
+                location: prop.location,
+                verified: prop.verified,
+                distance: `${calculatedDistance}km`,
+            };
+        });
 
         return NextResponse.json(formattedProperties, { status: 200 });
     } catch (error) {

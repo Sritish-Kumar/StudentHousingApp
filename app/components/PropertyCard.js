@@ -19,13 +19,13 @@ export default function PropertyCard({ property }) {
   const formattedPrice =
     typeof price === "number" ? `₹${price.toLocaleString("en-IN")}` : price;
 
-  // Format distance
+  // Format distance - handle both number and string formats
   const formattedDistance =
-    typeof distance === "number"
-      ? `${distance} mi`
-      : distance?.toString().includes("km")
-        ? distance
-        : `${distance} mi`;
+    distance === null || distance === undefined || distance === "0km"
+      ? null
+      : typeof distance === "string"
+        ? distance // Already formatted as "X.Xkm" from API
+        : `${distance}km`;
 
   // Get first 3 amenities for display
   const displayAmenities = amenities.slice(0, 3);
@@ -101,32 +101,36 @@ export default function PropertyCard({ property }) {
 
         {/* Distance & Amenities */}
         <div className="flex items-center gap-2 text-sm text-zinc-600 mb-4 flex-wrap">
-          <span className="flex items-center gap-1">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            {formattedDistance}
-          </span>
+          {formattedDistance && (
+            <>
+              <span className="flex items-center gap-1">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                {formattedDistance}
+              </span>
+              {displayAmenities.length > 0 && <span>•</span>}
+            </>
+          )}
 
           {displayAmenities.length > 0 && (
             <>
-              <span>•</span>
               <span className="flex items-center gap-1">
                 {displayAmenities.join(", ")}
                 {amenities.length > 3 && ` +${amenities.length - 3}`}
