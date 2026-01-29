@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import SearchBar from "./SearchBar";
 
-export default function Map({ onLocationSelect, selectedLocation }) {
+export default function Map({ onLocationSelect, selectedLocation, showSearch = true }) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const userMarker = useRef(null);
@@ -255,7 +255,7 @@ export default function Map({ onLocationSelect, selectedLocation }) {
     return (
         <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
 
-            <SearchBar onSelect={onPlaceSelect} />
+            {showSearch && <SearchBar onSelect={onPlaceSelect} />}
 
             {/* Route Info Card */}
             {routeInfo && (

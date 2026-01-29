@@ -232,6 +232,7 @@ export default function CreatePropertyPage() {
                   <Map
                     onLocationSelect={handleLocationSelect}
                     selectedLocation={formData.location}
+                    showSearch={false}
                   />
                 </div>
                 {formData.location ? (
