@@ -159,8 +159,8 @@ export default function PropertyDetailPage() {
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
                             className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${currentImageIndex === index
-                                ? "ring-4 ring-blue-500 scale-105"
-                                : "opacity-60 hover:opacity-100"
+                              ? "ring-4 ring-blue-500 scale-105"
+                              : "opacity-60 hover:opacity-100"
                               }`}
                           >
                             <img
@@ -270,6 +270,22 @@ export default function PropertyDetailPage() {
                         Available
                       </p>
                     </div>
+                  </div>
+
+                  {/* Get Directions Button */}
+                  <div>
+                    <button
+                      onClick={() => window.open(`/navigate/${property._id}`, '_blank')}
+                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50 flex items-center justify-center gap-3"
+                    >
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                      </svg>
+                      Get Live Directions
+                    </button>
+                    <p className="text-sm text-gray-500 text-center mt-2">
+                      Opens turn-by-turn navigation in new tab
+                    </p>
                   </div>
 
                   {/* Description */}
