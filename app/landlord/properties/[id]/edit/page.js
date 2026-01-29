@@ -266,6 +266,7 @@ export default function EditPropertyPage() {
                   <Map
                     onLocationSelect={handleLocationSelect}
                     selectedLocation={formData.location}
+                    showSearch={false}
                   />
                 </div>
               </div>
