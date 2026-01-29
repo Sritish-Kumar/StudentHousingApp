@@ -32,6 +32,13 @@ export async function POST(req) {
     );
   }
 
+  if (user.suspended) {
+    return NextResponse.json(
+      { message: "Account suspended. Please contact admin." },
+      { status: 403 }
+    );
+  }
+
   const token = signToken({
     id: user._id,
     role: user.role,
