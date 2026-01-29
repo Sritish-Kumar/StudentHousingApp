@@ -18,6 +18,18 @@ const UserSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    otp: {
+      type: String,
+      select: false,
+    },
+    otpExpiry: {
+      type: Date,
+      select: false,
+    },
     suspended: {
       type: Boolean,
       default: false,
