@@ -81,6 +81,7 @@ export async function POST(req) {
 
   // Send verification email
   try {
+    // We await this, but now with a 10s timeout from the transporter config
     await sendData({
       to: email,
       subject: "Verify your email address",
@@ -95,8 +96,14 @@ export async function POST(req) {
       `
     });
   } catch (error) {
-    console.error("Email sending failed:", error);
-    // Continue even if email fails, user can resend
+    console.error("Email sending failed during signup:", error);
+    // If email fails, we still return success for the account creation
+    // The user will see the OTP screen and can click "Resend" to try again
+    // This prevents the "40s wait then crash" experience
+    return NextResponse.json(
+      { message: "Signup successful, but email failed to send. Please try 'Resend Code'." },
+      { status: 201 }
+    );
   }
 
   return NextResponse.json(

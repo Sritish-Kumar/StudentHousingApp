@@ -15,6 +15,9 @@ const transporter = nodemailer.createTransport({
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
+    // Add timeouts to prevent 40s hangs on Render
+    connectionTimeout: 10000, // 10 seconds
+    socketTimeout: 10000,     // 10 seconds
 });
 
 export const sendData = async (data, req) => {
@@ -26,11 +29,14 @@ export const sendData = async (data, req) => {
     };
 
     try {
+        console.log(`Attempting to send email to ${data.to}...`);
         const info = await transporter.sendMail(mailOptions);
         console.log("Message sent: %s", info.messageId);
         return info;
     } catch (error) {
-        console.error("Error sending email:", error);
-        throw error;
+        console.error("Critical Email Error:", error);
+        // On production (Render), Gmail often blocks sign-ins.
+        // We throw checking connection specifically.
+        throw new Error(`Email failed: ${error.message}`);
     }
 };
