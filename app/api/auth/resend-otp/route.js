@@ -46,10 +46,11 @@ export async function POST(req) {
         console.log("OTP updated in DB for user:", user._id);
 
         // Send email
-        await sendData({
-            to: email,
-            subject: "Verify your email address",
-            html: `
+        try {
+            await sendData({
+                to: email,
+                subject: "Verify your email address",
+                html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Email Verification</h2>
           <p>Your verification code is:</p>
@@ -57,8 +58,16 @@ export async function POST(req) {
           <p>This code will expire in 10 minutes.</p>
         </div>
       `
-        });
-        console.log("Resend OTP email sent successfully");
+            });
+            console.log("Resend OTP email sent successfully");
+        } catch (error) {
+            console.error("Resend OTP Email failed:", error);
+            // Return 500 but with specific message so user knows to try again or contact support
+            return NextResponse.json(
+                { message: "Failed to send email. Provider might be blocking access." },
+                { status: 500 }
+            );
+        }
 
         return NextResponse.json(
             { message: "OTP resent successfully" },
