@@ -19,9 +19,47 @@ export async function POST(req) {
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
+    if (existingUser.isVerified) {
+      return NextResponse.json(
+        { message: "User already exists" },
+        { status: 409 }
+      );
+    }
+
+    // User exists but not verified -> Update password/name and Resend OTP
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    existingUser.name = name;
+    existingUser.password = hashedPassword;
+    existingUser.otp = otp;
+    existingUser.otpExpiry = otpExpiry;
+    existingUser.role = role || existingUser.role; // Update role if provided
+    await existingUser.save();
+
+    // Send verification email
+    try {
+      await sendData({
+        to: email,
+        subject: "Verify your email address",
+        html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Welcome Back!</h2>
+          <p>You previously started signing up but didn't verify.</p>
+          <p>Your new verification code is:</p>
+          <h1 style="background: #f4f4f4; padding: 10px; text-align: center; letter-spacing: 5px;">${otp}</h1>
+          <p>This code will expire in 10 minutes.</p>
+        </div>
+      `
+      });
+    } catch (error) {
+      console.error("Email sending failed:", error);
+    }
+
     return NextResponse.json(
-      { message: "User already exists" },
-      { status: 409 }
+      { message: "Signup successful. Verification code resent." },
+      { status: 201 }
     );
   }
 

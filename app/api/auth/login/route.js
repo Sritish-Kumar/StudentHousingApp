@@ -39,6 +39,13 @@ export async function POST(req) {
     );
   }
 
+  if (!user.isVerified) {
+    return NextResponse.json(
+      { message: "Email not verified. Please verify your email." },
+      { status: 403 }
+    );
+  }
+
   const token = signToken({
     id: user._id,
     role: user.role,

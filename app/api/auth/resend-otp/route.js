@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 export async function POST(req) {
     try {
         const { email } = await req.json();
+        console.log("Resend OTP Requested for:", email);
 
         if (!email) {
             return NextResponse.json(
@@ -19,6 +20,7 @@ export async function POST(req) {
         await connectDB();
 
         const user = await User.findOne({ email });
+        console.log("User found:", !!user);
 
         if (!user) {
             return NextResponse.json(
@@ -41,6 +43,7 @@ export async function POST(req) {
         user.otp = otp;
         user.otpExpiry = otpExpiry;
         await user.save();
+        console.log("OTP updated in DB for user:", user._id);
 
         // Send email
         await sendData({
@@ -55,6 +58,7 @@ export async function POST(req) {
         </div>
       `
         });
+        console.log("Resend OTP email sent successfully");
 
         return NextResponse.json(
             { message: "OTP resent successfully" },
