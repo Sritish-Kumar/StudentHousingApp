@@ -377,7 +377,7 @@ export default function PropertyDetailPage() {
                   </div>
 
                   {/* Map Preview */}
-                  <div className="rounded-2xl overflow-hidden border border-gray-200 h-64 shadow-md bg-gray-100 relative">
+                  <div className="rounded-2xl overflow-hidden border border-gray-200 h-64 shadow-md bg-gray-100 relative" style={{ zIndex: 0, isolation: 'isolate' }}>
                     {property.location?.coordinates &&
                       property.location.coordinates.length === 2 ? (
                       <PropertyMap
