@@ -1,18 +1,28 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
 const AuthContext = createContext({
   user: null,
   isLoading: true,
-  login: () => { },
-  logout: () => { },
-  refreshUser: () => { },
+  login: () => {},
+  logout: () => {},
+  refreshUser: () => {},
+  isLoginModalOpen: false,
+  openLoginModal: () => {},
+  closeLoginModal: () => {},
 });
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -53,9 +63,26 @@ export function AuthProvider({ children }) {
     fetchUser();
   };
 
+  const openLoginModal = useCallback(() => {
+    setIsLoginModalOpen(true);
+  }, []);
+
+  const closeLoginModal = useCallback(() => {
+    setIsLoginModalOpen(false);
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, logout, refreshUser }}
+      value={{
+        user,
+        isLoading,
+        login,
+        logout,
+        refreshUser,
+        isLoginModalOpen,
+        openLoginModal,
+        closeLoginModal,
+      }}
     >
       {children}
     </AuthContext.Provider>

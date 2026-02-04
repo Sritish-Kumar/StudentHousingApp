@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Building2,
@@ -12,13 +13,27 @@ import {
   Camera,
   Zap,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function HomeContent() {
+  const router = useRouter();
+  const { user, isLoading, openLoginModal } = useAuth();
   const [activeFilter, setActiveFilter] = useState("all");
   const [properties, setProperties] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingProperties, setIsLoadingProperties] = useState(true);
   const [featuredProperty, setFeaturedProperty] = useState(null);
+
+  // Handle property click with authentication check
+  const handlePropertyClick = (e, path) => {
+    e.preventDefault();
+    if (!user) {
+      // Open login modal directly
+      openLoginModal();
+    } else {
+      router.push(path);
+    }
+  };
 
   useEffect(() => {
     fetchProperties();
@@ -43,7 +58,7 @@ export default function HomeContent() {
     } catch (error) {
       console.error("Error fetching properties:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingProperties(false);
     }
   };
 
@@ -153,7 +168,15 @@ export default function HomeContent() {
                       ₹{featuredProperty.price.toLocaleString("en-IN")}
                       <span className="text-lg text-blue-100">/mo</span>
                     </div>
-                    <button className="bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300">
+                    <button
+                      onClick={(e) =>
+                        handlePropertyClick(
+                          e,
+                          `/explore/${featuredProperty._id}`,
+                        )
+                      }
+                      className="bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300"
+                    >
                       View
                     </button>
                   </div>
@@ -184,11 +207,15 @@ export default function HomeContent() {
         </div>
 
         <div className="flex gap-6 px-6 sm:px-12 lg:px-20 overflow-x-auto pb-6 scrollbar-hide">
-          {isLoading ? (
+          {isLoadingProperties ? (
             <div className="text-zinc-600">Loading properties...</div>
           ) : (
             properties.slice(0, 4).map((property, index) => (
-              <Link key={property.id} href="/explore">
+              <a
+                key={property.id}
+                href="/explore"
+                onClick={(e) => handlePropertyClick(e, "/explore")}
+              >
                 <div
                   className="min-w-[320px] bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-3xl p-6 hover:border-blue-300 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 hover:-translate-y-2 cursor-pointer group"
                   style={{ animationDelay: `${index * 100}ms` }}
@@ -226,7 +253,7 @@ export default function HomeContent() {
                     </button>
                   </div>
                 </div>
-              </Link>
+              </a>
             ))
           )}
         </div>
@@ -417,7 +444,11 @@ export default function HomeContent() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {properties.map((property, index) => (
-                  <Link key={property.id} href="/explore">
+                  <a
+                    key={property.id}
+                    href="/explore"
+                    onClick={(e) => handlePropertyClick(e, "/explore")}
+                  >
                     <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-blue-300 hover:shadow-xl transition-all duration-500 hover:-translate-y-1 cursor-pointer group">
                       {property.images && property.images.length > 0 ? (
                         <div className="h-48 overflow-hidden">
@@ -456,7 +487,7 @@ export default function HomeContent() {
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </a>
                 ))}
               </div>
             </div>

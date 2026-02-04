@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SignupModal from "./SignupModal";
 import LoginModal from "./LoginModal";
 import { useAuth } from "../context/AuthContext";
@@ -9,17 +9,48 @@ import { useAuth } from "../context/AuthContext";
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const { user, isLoading, logout } = useAuth();
+  const {
+    user,
+    isLoading,
+    logout,
+    isLoginModalOpen,
+    openLoginModal,
+    closeLoginModal,
+  } = useAuth();
+
+  // Check if we should open login modal (from protected route redirect)
+  useEffect(() => {
+    const checkLoginModal = () => {
+      const shouldShowLogin = sessionStorage.getItem("showLoginModal");
+      if (shouldShowLogin === "true") {
+        sessionStorage.removeItem("showLoginModal");
+        openLoginModal();
+      }
+    };
+
+    // Check on mount
+    checkLoginModal();
+
+    // Listen for storage events (from other tabs/windows or manual triggers)
+    window.addEventListener("storage", checkLoginModal);
+
+    // Listen for custom event (for same-window updates)
+    window.addEventListener("checkLoginModal", checkLoginModal);
+
+    return () => {
+      window.removeEventListener("storage", checkLoginModal);
+      window.removeEventListener("checkLoginModal", checkLoginModal);
+    };
+  }, [openLoginModal]);
 
   const openSignupModal = () => {
     setIsSignupModalOpen(true);
-    setIsLoginModalOpen(false);
+    closeLoginModal();
     setIsMobileMenuOpen(false);
   };
 
-  const openLoginModal = () => {
-    setIsLoginModalOpen(true);
+  const handleOpenLoginModal = () => {
+    openLoginModal();
     setIsSignupModalOpen(false);
     setIsMobileMenuOpen(false);
   };
@@ -92,7 +123,7 @@ export default function Navbar() {
                       // Logged out state
                       <>
                         <button
-                          onClick={openLoginModal}
+                          onClick={handleOpenLoginModal}
                           className="text-zinc-600 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-all duration-300 hover:scale-105"
                         >
                           Login
@@ -186,7 +217,7 @@ export default function Navbar() {
                       // Logged out state (mobile)
                       <>
                         <button
-                          onClick={openLoginModal}
+                          onClick={handleOpenLoginModal}
                           className="text-zinc-600 hover:text-blue-600 block w-full text-left px-4 py-3 text-base font-medium rounded-xl hover:bg-blue-50 transition-colors"
                         >
                           Login
@@ -215,7 +246,7 @@ export default function Navbar() {
       />
       <LoginModal
         isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
+        onClose={closeLoginModal}
         onSwitchToSignup={openSignupModal}
       />
     </>

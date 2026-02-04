@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Layout from "../components/Layout";
 import FilterSidebar from "../components/FilterSidebar";
 import PropertyCard from "../components/PropertyCard";
 import useDebounce from "../hooks/useDebounce";
+import { useAuth } from "../context/AuthContext";
 
 export default function ExplorePage() {
+  const router = useRouter();
+  const { user, isLoading: authLoading, openLoginModal } = useAuth();
+  const hasRedirected = useRef(false);
+
   const [properties, setProperties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,12 +23,46 @@ export default function ExplorePage() {
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
 
+  // Check authentication - redirect if not logged in
+  useEffect(() => {
+    console.log("Auth check - authLoading:", authLoading, "user:", user);
+    if (!authLoading) {
+      if (!user) {
+        console.log("No user detected, redirecting to home...");
+        // Set flag for login modal
+        sessionStorage.setItem("showLoginModal", "true");
+        console.log("SessionStorage set, redirecting now...");
+        // Redirect immediately
+        window.location.href = "/";
+      } else {
+        console.log("User is authenticated:", user);
+      }
+    }
+  }, [user, authLoading]);
+
+  // Don't render anything while checking auth or if not authenticated
+  if (authLoading || !user) {
+    console.log("Showing loading - authLoading:", authLoading, "user:", user);
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   // Fetch Suggestions
   useEffect(() => {
     if (debouncedSearch && debouncedSearch.length > 1) {
       const fetchSuggestions = async () => {
         try {
-          const res = await fetch(`/api/properties/autocomplete?q=${encodeURIComponent(debouncedSearch)}`);
+          const res = await fetch(
+            `/api/properties/autocomplete?q=${encodeURIComponent(debouncedSearch)}`,
+          );
           if (res.ok) {
             const data = await res.json();
             setSuggestions(data);
@@ -126,7 +166,8 @@ export default function ExplorePage() {
 
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = "Location permission denied. Please enable location access in your browser settings.";
+            errorMessage =
+              "Location permission denied. Please enable location access in your browser settings.";
             break;
           case error.POSITION_UNAVAILABLE:
             errorMessage = "Location information is unavailable.";
@@ -143,7 +184,7 @@ export default function ExplorePage() {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 0,
-      }
+      },
     );
   };
 
@@ -263,8 +304,18 @@ export default function ExplorePage() {
                               {suggestion.college}
                             </div>
                           </div>
-                          <svg className="w-5 h-5 text-gray-300 group-hover/item:text-blue-500 opacity-0 group-hover/item:opacity-100 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <svg
+                            className="w-5 h-5 text-gray-300 group-hover/item:text-blue-500 opacity-0 group-hover/item:opacity-100 transition-all"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
                           </svg>
                         </div>
                       ))}

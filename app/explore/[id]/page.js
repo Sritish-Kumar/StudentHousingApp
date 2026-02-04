@@ -1,17 +1,45 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Layout from "../../components/Layout";
 import PropertyMap from "../../components/PropertyMap";
+import { useAuth } from "../../context/AuthContext";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
+  const { user, isLoading: authLoading, openLoginModal } = useAuth();
+  const hasRedirected = useRef(false);
+
   const [property, setProperty] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Check authentication - redirect if not logged in
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        // Set flag for login modal
+        sessionStorage.setItem("showLoginModal", "true");
+        // Redirect immediately
+        window.location.href = "/";
+      }
+    }
+  }, [user, authLoading]);
+
+  // Don't render anything while checking auth or if not authenticated
+  if (authLoading || !user) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   useEffect(() => {
     if (id) {
@@ -158,10 +186,11 @@ export default function PropertyDetailPage() {
                           <button
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
-                            className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${currentImageIndex === index
-                              ? "ring-4 ring-blue-500 scale-105"
-                              : "opacity-60 hover:opacity-100"
-                              }`}
+                            className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${
+                              currentImageIndex === index
+                                ? "ring-4 ring-blue-500 scale-105"
+                                : "opacity-60 hover:opacity-100"
+                            }`}
                           >
                             <img
                               src={image}
@@ -275,11 +304,23 @@ export default function PropertyDetailPage() {
                   {/* Get Directions Button */}
                   <div>
                     <button
-                      onClick={() => window.open(`/navigate/${property._id}`, '_blank')}
+                      onClick={() =>
+                        window.open(`/navigate/${property._id}`, "_blank")
+                      }
                       className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-2xl font-bold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50 flex items-center justify-center gap-3"
                     >
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.5}
+                          d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                        />
                       </svg>
                       Get Live Directions
                     </button>
@@ -379,7 +420,7 @@ export default function PropertyDetailPage() {
                   {/* Map Preview */}
                   <div className="rounded-2xl overflow-hidden border border-gray-200 h-64 shadow-md bg-gray-100 relative">
                     {property.location?.coordinates &&
-                      property.location.coordinates.length === 2 ? (
+                    property.location.coordinates.length === 2 ? (
                       <PropertyMap
                         coordinates={property.location.coordinates}
                         title={property.title}
