@@ -201,26 +201,25 @@ export async function PUT(req, { params }) {
 
           console.log(`📧 Sending update notifications to ${admins.length} admin(s)`);
 
-          // Send email to each admin asynchronously
-          const emailPromises = admins.map(admin => {
-            console.log(`📨 Sending update email to: ${admin.email}`);
-            return sendData({
-              to: admin.email,
-              subject: `🔄 Property Updated - ${updatedProperty.title}`,
-              html: getAdminPropertyUpdateNotificationTemplate(propertyData, landlordData, changes, siteUrl)
-            }).then(() => {
-              console.log(`✅ Update email sent to: ${admin.email}`);
-            }).catch(error => {
-              console.error(`❌ Failed to send update email to ${admin.email}:`, error.message);
-            });
-          });
+          // Send email to each admin with proper error handling
+          for (const admin of admins) {
+            try {
+              console.log(`📨 Attempting to send update email to: ${admin.email}`);
+              await sendData({
+                to: admin.email,
+                subject: `🔄 Property Updated - ${updatedProperty.title}`,
+                html: getAdminPropertyUpdateNotificationTemplate(propertyData, landlordData, changes, siteUrl)
+              });
+              console.log(`✅ Update email sent successfully to: ${admin.email}`);
+            } catch (error) {
+              console.error(`❌ CRITICAL: Failed to send update email to admin ${admin.email}`);
+              console.error(`   Error details:`, error);
+              console.error(`   Error message:`, error.message);
+              console.error(`   Error stack:`, error.stack);
+            }
+          }
 
-          // Don't await - let emails send in background
-          Promise.all(emailPromises).then(() => {
-            console.log(`✅ All admin update notification emails sent`);
-          }).catch(error => {
-            console.error('❌ Some admin update emails failed:', error);
-          });
+          console.log(`✅ Admin update notification process completed`);
         } else {
           console.log('⚠️ No admins found or landlord not found - skipping update notifications');
         }

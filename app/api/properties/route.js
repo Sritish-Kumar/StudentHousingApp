@@ -99,29 +99,25 @@ export async function POST(req) {
 
                 console.log(`📧 Preparing to send emails to ${admins.length} admin(s) for property: ${title}`);
 
-                // Send email to each admin asynchronously
-                const emailPromises = admins.map(admin => {
-                    console.log(`📨 Sending email to: ${admin.email}`);
-                    return sendData({
-                        to: admin.email,
-                        subject: `🏠 New Property Listed - ${title}`,
-                        html: getAdminPropertyNotificationTemplate(propertyData, landlordData, siteUrl)
-                    }).then(() => {
+                // Send email to each admin with proper error handling
+                for (const admin of admins) {
+                    try {
+                        console.log(`📨 Attempting to send email to: ${admin.email}`);
+                        await sendData({
+                            to: admin.email,
+                            subject: `🏠 New Property Listed - ${title}`,
+                            html: getAdminPropertyNotificationTemplate(propertyData, landlordData, siteUrl)
+                        });
                         console.log(`✅ Email sent successfully to: ${admin.email}`);
-                    }).catch(error => {
-                        // Log error but don't fail the request
-                        console.error(`❌ Failed to send email to admin ${admin.email}:`, error.message);
-                    });
-                });
+                    } catch (error) {
+                        console.error(`❌ CRITICAL: Failed to send email to admin ${admin.email}`);
+                        console.error(`   Error details:`, error);
+                        console.error(`   Error message:`, error.message);
+                        console.error(`   Error stack:`, error.stack);
+                    }
+                }
 
-                // Don't await - let emails send in background
-                Promise.all(emailPromises).then(() => {
-                    console.log(`✅ All admin notification emails sent for property: ${newProperty._id}`);
-                }).catch(error => {
-                    console.error('❌ Some admin emails failed:', error);
-                });
-
-                console.log(`📧 Email sending initiated for ${admins.length} admin(s)`);
+                console.log(`✅ Admin email notification process completed for property: ${newProperty._id}`);
             } else {
                 console.log('⚠️ No admins found or landlord not found - skipping email notifications');
                 console.log('   Admins count:', admins ? admins.length : 0);

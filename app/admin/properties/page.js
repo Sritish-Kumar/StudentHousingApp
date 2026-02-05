@@ -52,6 +52,7 @@ export default function AdminPropertiesPage() {
 
   const handleVerify = async (propertyId) => {
     try {
+      console.log(`🔄 Verifying property ${propertyId}...`);
       const res = await fetch(`/api/admin/properties/${propertyId}/verify`, {
         method: "PATCH",
         credentials: "include",
@@ -59,12 +60,22 @@ export default function AdminPropertiesPage() {
         body: JSON.stringify({ verified: true }),
       });
 
+      const data = await res.json();
+      console.log('📧 Verify response:', data);
+
       if (res.ok) {
+        console.log('✅ Property verified successfully');
+        console.log('📧 Landlord approval email sent to:', data.landlordEmail || 'unknown');
+        alert(`✅ Property verified! Approval email sent to landlord.`);
         fetchProperties();
         setConfirmDialog({ isOpen: false, action: null, propertyId: null });
+      } else {
+        console.error('❌ Verification failed:', data);
+        alert(`❌ Failed to verify property: ${data.message || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error("Error verifying property:", error);
+      console.error("❌ Error verifying property:", error);
+      alert(`❌ Error: ${error.message}`);
     }
   };
 
@@ -73,6 +84,7 @@ export default function AdminPropertiesPage() {
     if (!reason) return;
 
     try {
+      console.log(`🔄 Rejecting property ${propertyId}...`);
       const res = await fetch(`/api/admin/properties/${propertyId}/reject`, {
         method: "POST",
         credentials: "include",
@@ -80,11 +92,21 @@ export default function AdminPropertiesPage() {
         body: JSON.stringify({ reason }),
       });
 
+      const data = await res.json();
+      console.log('📧 Reject response:', data);
+
       if (res.ok) {
+        console.log('✅ Property rejected successfully');
+        console.log('📧 Landlord rejection email sent to:', data.landlordEmail || 'unknown');
+        alert(`✅ Property rejected! Rejection email sent to landlord.`);
         fetchProperties();
+      } else {
+        console.error('❌ Rejection failed:', data);
+        alert(`❌ Failed to reject property: ${data.message || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error("Error rejecting property:", error);
+      console.error("❌ Error rejecting property:", error);
+      alert(`❌ Error: ${error.message}`);
     }
   };
 
@@ -135,11 +157,10 @@ export default function AdminPropertiesPage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
-              activeTab === tab.id
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
+            className={`px-3 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${activeTab === tab.id
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900"
+              }`}
           >
             {tab.label}
             {tab.count > 0 && (
