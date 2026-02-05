@@ -51,16 +51,20 @@ export async function POST(req, { params }) {
 
         console.log(`📧 Sending rejection email to landlord: ${landlordEmail}`);
 
-        // Send email asynchronously
-        sendData({
-          to: landlordEmail,
-          subject: `📋 Property Listing Update Required`,
-          html: getLandlordPropertyRejectionTemplate(propertyData, landlordName, rejectionReason)
-        }).then(() => {
-          console.log(`✅ Rejection email sent to landlord: ${landlordEmail}`);
-        }).catch(error => {
-          console.error(`❌ Failed to send rejection email to landlord ${landlordEmail}:`, error.message);
-        });
+        // Send email with proper await
+        try {
+          await sendData({
+            to: landlordEmail,
+            subject: `📋 Property Listing Update Required`,
+            html: getLandlordPropertyRejectionTemplate(propertyData, landlordName, rejectionReason)
+          });
+          console.log(`✅ Rejection email sent successfully to landlord: ${landlordEmail}`);
+        } catch (error) {
+          console.error(`❌ CRITICAL: Failed to send rejection email to landlord ${landlordEmail}`);
+          console.error(`   Error details:`, error);
+          console.error(`   Error message:`, error.message);
+          console.error(`   Error stack:`, error.stack);
+        }
       } catch (emailError) {
         console.error('Error sending rejection email:', emailError);
         // Don't fail the request if email fails
@@ -77,6 +81,8 @@ export async function POST(req, { params }) {
           rejectedAt: property.rejectedAt,
           rejectionReason: property.rejectionReason,
         },
+        landlordEmail: property.owner?.email,
+        emailSent: property.owner ? true : false
       },
       { status: 200 },
     );

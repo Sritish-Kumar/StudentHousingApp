@@ -60,16 +60,20 @@ export async function PATCH(req, { params }) {
 
         console.log(`📧 Sending approval email to landlord: ${landlordEmail}`);
 
-        // Send email asynchronously
-        sendData({
-          to: landlordEmail,
-          subject: `🎉 Congratulations! Your Property Has Been Approved`,
-          html: getLandlordPropertyApprovalTemplate(propertyData, landlordName)
-        }).then(() => {
-          console.log(`✅ Approval email sent to landlord: ${landlordEmail}`);
-        }).catch(error => {
-          console.error(`❌ Failed to send approval email to landlord ${landlordEmail}:`, error.message);
-        });
+        // Send email with proper await
+        try {
+          await sendData({
+            to: landlordEmail,
+            subject: `🎉 Congratulations! Your Property Has Been Approved`,
+            html: getLandlordPropertyApprovalTemplate(propertyData, landlordName)
+          });
+          console.log(`✅ Approval email sent successfully to landlord: ${landlordEmail}`);
+        } catch (error) {
+          console.error(`❌ CRITICAL: Failed to send approval email to landlord ${landlordEmail}`);
+          console.error(`   Error details:`, error);
+          console.error(`   Error message:`, error.message);
+          console.error(`   Error stack:`, error.stack);
+        }
       } catch (emailError) {
         console.error('Error sending approval email:', emailError);
         // Don't fail the request if email fails
@@ -80,6 +84,8 @@ export async function PATCH(req, { params }) {
       {
         message: `Property ${verified ? "verified" : "unverified"} successfully`,
         property,
+        landlordEmail: property.owner?.email,
+        emailSent: verified && property.owner ? true : false
       },
       { status: 200 },
     );
