@@ -1,5 +1,7 @@
 import "./globals.css";
+import "./styles/chat-animations.css";
 import Providers from "./components/Providers";
+import ChatIcon from "./components/ChatIcon";
 
 export const metadata = {
   title: "Student Housing App",
@@ -16,7 +18,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ChatIcon />
+        </Providers>
       </body>
     </html>
   );

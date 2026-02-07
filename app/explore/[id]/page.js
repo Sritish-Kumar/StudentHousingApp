@@ -54,10 +54,18 @@ export default function PropertyDetailPage() {
         try {
           const landlordData = await getPublicLandlordProfile(data.owner);
           console.log("Fetched landlord data:", landlordData);
-          setLandlord(landlordData.profile);
+          // Handle both cases: landlordData.profile or landlordData directly
+          const landlordInfo = landlordData.profile || landlordData;
+          // Ensure we have the _id field
+          if (landlordInfo && !landlordInfo._id && data.owner) {
+            landlordInfo._id = data.owner;
+          }
+          setLandlord(landlordInfo);
+          console.log("Set landlord:", landlordInfo);
         } catch (err) {
           console.error("Failed to fetch landlord profile:", err);
-          // Don't fail the whole page if landlord fetch fails
+          // Set basic landlord info with owner ID so chat can still work
+          setLandlord({ _id: data.owner, name: "Property Owner" });
         }
       }
     } catch (err) {
@@ -219,11 +227,10 @@ export default function PropertyDetailPage() {
                           <button
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
-                            className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${
-                              currentImageIndex === index
-                                ? "ring-4 ring-blue-500 scale-105"
-                                : "opacity-60 hover:opacity-100"
-                            }`}
+                            className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden transition-all ${currentImageIndex === index
+                              ? "ring-4 ring-blue-500 scale-105"
+                              : "opacity-60 hover:opacity-100"
+                              }`}
                           >
                             <img
                               src={image}
@@ -272,61 +279,61 @@ export default function PropertyDetailPage() {
                     <h1 className="text-4xl font-bold text-zinc-900 mb-2">
                       {property.title}
                     </h1>
-                <p className="text-zinc-600 flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  {property.location?.address || "Location not specified"}
-                </p>
-                
-                {/* Landlord Badge */}
-                {landlord && (
-                  <Link
-                    href={`/landlord/profile/${landlord.id}`}
-                    className="inline-flex items-center gap-2 mt-3 px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-all duration-300 group"
-                  >
-                    {landlord.profileImage ? (
-                      <img
-                        src={landlord.profileImage}
-                        alt={landlord.name}
-                        className="w-8 h-8 rounded-full object-cover border-2 border-blue-400"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-2 border-blue-400">
-                        <span className="text-xs font-bold text-white">
-                          {getInitials(landlord.name)}
+                    <p className="text-zinc-600 flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      {property.location?.address || "Location not specified"}
+                    </p>
+
+                    {/* Landlord Badge */}
+                    {landlord && (
+                      <Link
+                        href={`/landlord/profile/${landlord.id}`}
+                        className="inline-flex items-center gap-2 mt-3 px-3 py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-all duration-300 group"
+                      >
+                        {landlord.profileImage ? (
+                          <img
+                            src={landlord.profileImage}
+                            alt={landlord.name}
+                            className="w-8 h-8 rounded-full object-cover border-2 border-blue-400"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-2 border-blue-400">
+                            <span className="text-xs font-bold text-white">
+                              {getInitials(landlord.name)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
+                            {landlord.name}
+                          </span>
+                          {landlord.isVerified && (
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                          )}
+                        </div>
+                        <span className="text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                          →
                         </span>
-                      </div>
+                      </Link>
                     )}
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-gray-700 group-hover:text-blue-600 transition-colors">
-                        {landlord.name}
-                      </span>
-                      {landlord.isVerified && (
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                      )}
-                    </div>
-                    <span className="text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                      →
-                    </span>
-                  </Link>
-                )}
                   </div>
 
                   {/* Key Stats Grid */}
@@ -551,7 +558,44 @@ export default function PropertyDetailPage() {
                       <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-blue-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
                         Book Now
                       </button>
-                      <button className="w-full bg-white text-zinc-700 border-2 border-gray-200 py-4 rounded-xl font-bold text-lg hover:border-blue-600 hover:text-blue-600 transition-all">
+                      <button
+                        onClick={async () => {
+                          if (!user) {
+                            alert("Please login to contact the landlord");
+                            return;
+                          }
+                          if (!landlord || !landlord._id) {
+                            alert("Landlord information not available");
+                            return;
+                          }
+                          try {
+                            const res = await fetch("/api/conversations", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                propertyId: property._id,
+                                landlordId: landlord._id,
+                              }),
+                            });
+                            if (res.ok) {
+                              const data = await res.json();
+                              // Dispatch event to open chat
+                              const event = new CustomEvent("openChat", {
+                                detail: { conversation: data.conversation }
+                              });
+                              window.dispatchEvent(event);
+                            } else {
+                              const error = await res.json();
+                              console.error("Failed to start conversation:", error);
+                              alert(`Failed to start conversation: ${error.message || 'Unknown error'}`);
+                            }
+                          } catch (error) {
+                            console.error("Error starting conversation:", error);
+                            alert("Failed to start conversation");
+                          }
+                        }}
+                        className="w-full bg-white text-zinc-700 border-2 border-gray-200 py-4 rounded-xl font-bold text-lg hover:border-blue-600 hover:text-blue-600 transition-all"
+                      >
                         Contact Landlord
                       </button>
                     </div>
@@ -567,7 +611,7 @@ export default function PropertyDetailPage() {
                     style={{ zIndex: 0, isolation: "isolate" }}
                   >
                     {property.location?.coordinates &&
-                    property.location.coordinates.length === 2 ? (
+                      property.location.coordinates.length === 2 ? (
                       <PropertyMap
                         coordinates={property.location.coordinates}
                         title={property.title}

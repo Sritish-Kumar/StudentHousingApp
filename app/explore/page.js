@@ -36,64 +36,31 @@ export default function ExplorePage() {
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState(null);
 
-  // Check authentication - redirect if not logged in
-  useEffect(() => {
-    console.log("Auth check - authLoading:", authLoading, "user:", user);
-    if (!authLoading) {
-      if (!user) {
-        console.log("No user detected, redirecting to home...");
-        // Set flag for login modal
-        sessionStorage.setItem("showLoginModal", "true");
-        console.log("SessionStorage set, redirecting now...");
-        // Redirect immediately
-        window.location.href = "/";
-      } else {
-        console.log("User is authenticated:", user);
-      }
+  const sortProperties = (props, sort) => {
+    const sorted = [...props];
+
+    switch (sort) {
+      case "price-low":
+        return sorted.sort((a, b) => a.price - b.price);
+      case "price-high":
+        return sorted.sort((a, b) => b.price - a.price);
+      case "distance":
+        return sorted.sort((a, b) => {
+          const distA =
+            typeof a.distance === "number"
+              ? a.distance
+              : parseFloat(a.distance);
+          const distB =
+            typeof b.distance === "number"
+              ? b.distance
+              : parseFloat(b.distance);
+          return distA - distB;
+        });
+      case "newest":
+      default:
+        return sorted; // Already sorted by createdAt desc from API
     }
-  }, [user, authLoading]);
-
-  // Fetch Suggestions
-  useEffect(() => {
-    if (debouncedSearch && debouncedSearch.length > 1) {
-      const fetchSuggestions = async () => {
-        try {
-          const res = await fetch(
-            `/api/properties/autocomplete?q=${encodeURIComponent(debouncedSearch)}`,
-          );
-          if (res.ok) {
-            const data = await res.json();
-            setSuggestions(data);
-          }
-        } catch (err) {
-          console.error("Suggestion fetch error", err);
-        }
-      };
-      fetchSuggestions();
-    } else {
-      setSuggestions([]);
-    }
-  }, [debouncedSearch]);
-
-  // Fetch properties from API
-  useEffect(() => {
-    fetchProperties();
-  }, [filters, sortBy, userLocation]);
-
-  // Don't render anything while checking auth or if not authenticated
-  if (authLoading || !user) {
-    console.log("Showing loading - authLoading:", authLoading, "user:", user);
-    return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
-            <p className="mt-4 text-gray-600">Loading...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  };
 
   const fetchProperties = async () => {
     setIsLoading(true);
@@ -188,31 +155,66 @@ export default function ExplorePage() {
     );
   };
 
-  const sortProperties = (props, sort) => {
-    const sorted = [...props];
-
-    switch (sort) {
-      case "price-low":
-        return sorted.sort((a, b) => a.price - b.price);
-      case "price-high":
-        return sorted.sort((a, b) => b.price - a.price);
-      case "distance":
-        return sorted.sort((a, b) => {
-          const distA =
-            typeof a.distance === "number"
-              ? a.distance
-              : parseFloat(a.distance);
-          const distB =
-            typeof b.distance === "number"
-              ? b.distance
-              : parseFloat(b.distance);
-          return distA - distB;
-        });
-      case "newest":
-      default:
-        return sorted; // Already sorted by createdAt desc from API
+  // Check authentication - redirect if not logged in
+  useEffect(() => {
+    console.log("Auth check - authLoading:", authLoading, "user:", user);
+    if (!authLoading) {
+      if (!user) {
+        console.log("No user detected, redirecting to home...");
+        // Set flag for login modal
+        sessionStorage.setItem("showLoginModal", "true");
+        console.log("SessionStorage set, redirecting now...");
+        // Redirect immediately
+        window.location.href = "/";
+      } else {
+        console.log("User is authenticated:", user);
+      }
     }
-  };
+  }, [user, authLoading]);
+
+  // Fetch Suggestions
+  useEffect(() => {
+    if (debouncedSearch && debouncedSearch.length > 1) {
+      const fetchSuggestions = async () => {
+        try {
+          const res = await fetch(
+            `/api/properties/autocomplete?q=${encodeURIComponent(debouncedSearch)}`,
+          );
+          if (res.ok) {
+            const data = await res.json();
+            setSuggestions(data);
+          }
+        } catch (err) {
+          console.error("Suggestion fetch error", err);
+        }
+      };
+      fetchSuggestions();
+    } else {
+      setSuggestions([]);
+    }
+  }, [debouncedSearch]);
+
+  // Fetch properties from API
+  useEffect(() => {
+    fetchProperties();
+  }, [filters, sortBy, userLocation]);
+
+  // Don't render anything while checking auth or if not authenticated
+  if (authLoading || !user) {
+    console.log("Showing loading - authLoading:", authLoading, "user:", user);
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
