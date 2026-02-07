@@ -83,7 +83,7 @@ export default function PublicLandlordProfile() {
               Landlord Not Found
             </h1>
             <p className="text-gray-600 mb-6">
-              We couldn't find the landlord profile you're looking for.
+              We couldn&apos;t find the landlord profile you&apos;re looking for.
             </p>
             <button
               onClick={() => router.back()}

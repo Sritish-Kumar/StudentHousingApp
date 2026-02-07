@@ -20,6 +20,25 @@ export default function ChatIcon() {
         setIsMounted(true);
     }, []);
 
+    // Fetch unread count function
+    const fetchUnreadCount = async () => {
+        try {
+            const res = await fetch("/api/conversations");
+            if (res.ok) {
+                const data = await res.json();
+                if (data.conversations) {
+                    const total = data.conversations.reduce(
+                        (sum, conv) => sum + (conv.unreadCount?.[user?._id || user?.id] || 0),
+                        0
+                    );
+                    setUnreadCount(total);
+                }
+            }
+        } catch (error) {
+            // Silent fail - don't break the app
+        }
+    };
+
     useEffect(() => {
         if (user && isMounted) {
             fetchUnreadCount();
@@ -44,24 +63,6 @@ export default function ChatIcon() {
             };
         }
     }, [user, isMounted]);
-
-    const fetchUnreadCount = async () => {
-        try {
-            const res = await fetch("/api/conversations");
-            if (res.ok) {
-                const data = await res.json();
-                if (data.conversations) {
-                    const total = data.conversations.reduce(
-                        (sum, conv) => sum + (conv.unreadCount?.[user?._id || user?.id] || 0),
-                        0
-                    );
-                    setUnreadCount(total);
-                }
-            }
-        } catch (error) {
-            // Silent fail - don't break the app
-        }
-    };
 
     // Don't render during SSR or if user not logged in
     if (!isMounted || !user) return null;
@@ -91,7 +92,7 @@ export default function ChatIcon() {
 
             {/* Chat Panel - Responsive for Mobile */}
             {isOpen && (
-                <div className="fixed inset-0 z-50 bg-white md:fixed md:bottom-24 md:right-6 md:w-96 md:h-[600px] md:inset-auto md:rounded-2xl md:shadow-2xl md:border md:border-gray-200 overflow-hidden flex flex-col transition-all duration-300 animate-fadeIn">
+                <div className="fixed inset-0 z-50 bg-white md:fixed md:bottom-24 md:right-6 md:w-96 md:h-[600px] md:inset-auto md:rounded-xl md:shadow-2xl overflow-hidden flex flex-col transition-all duration-300 animate-fadeIn">
                     <ChatList
                         onClose={() => {
                             setIsOpen(false);

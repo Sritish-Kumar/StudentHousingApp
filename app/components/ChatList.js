@@ -122,15 +122,15 @@ export default function ChatList({ onClose, onUpdateUnread, initialConversation 
             </div>
 
             {/* Search Bar */}
-            <div className="p-3 border-b border-gray-200 bg-gray-50">
+            <div className="p-3 border-b border-gray-100 bg-white">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         type="text"
                         placeholder="Search conversations..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full pl-11 pr-4 py-2.5 bg-gray-50 rounded-full outline-none text-sm placeholder:text-gray-400 shadow-sm transition-all duration-200 hover:shadow-md focus:bg-white"
                     />
                 </div>
             </div>

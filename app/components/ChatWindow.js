@@ -15,7 +15,6 @@ import {
     X,
     Plus,
 } from "lucide-react";
-import { io } from "socket.io-client";
 import MessageBubble from "./MessageBubble";
 import dynamic from "next/dynamic";
 import EmojiPicker from "emoji-picker-react";
@@ -23,26 +22,68 @@ import EmojiPicker from "emoji-picker-react";
 // Dynamic import for VoiceRecorder
 const VoiceRecorder = dynamic(() => import("./VoiceRecorder"), { ssr: false });
 
+// Request notification permission on load
+const requestNotificationPermission = async () => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "default") {
+            await Notification.requestPermission();
+        }
+    }
+};
+
+// Show browser notification
+const showNotification = (title, body, icon) => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+    if (document.hasFocus()) return; // Don't show if tab is focused
+
+    const notification = new Notification(title, {
+        body: body,
+        icon: icon || "/favicon.ico",
+        badge: "/favicon.ico",
+        tag: "chat-message",
+        renotify: true,
+        silent: false,
+    });
+
+    // Play notification sound
+    try {
+        const audio = new Audio("/notification.mp3");
+        audio.volume = 0.5;
+        audio.play().catch(() => { });
+    } catch (e) { }
+
+    notification.onclick = () => {
+        window.focus();
+        notification.close();
+    };
+
+    // Auto close after 5 seconds
+    setTimeout(() => notification.close(), 5000);
+};
+
 export default function ChatWindow({ conversation, onBack }) {
     const { user } = useAuth();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [isLoading, setIsLoading] = useState(true);
-    const [socket, setSocket] = useState(null);
     const [isTyping, setIsTyping] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [editingMessage, setEditingMessage] = useState(null); // Message object being edited
-
+    const [editingMessage, setEditingMessage] = useState(null);
     const [showAttachMenu, setShowAttachMenu] = useState(false);
 
     const messagesEndRef = useRef(null);
     const textareaRef = useRef(null);
     const fileInputRef = useRef(null);
-    const docInputRef = useRef(null); // For file attachments
+    const docInputRef = useRef(null);
     const typingTimeoutRef = useRef(null);
+
+    // Ably refs
+    const ablyClientRef = useRef(null);
+    const channelRef = useRef(null);
 
     const otherParticipant = conversation?.participants?.find(
         (p) => p._id !== (user?._id || user?.id)
@@ -50,55 +91,104 @@ export default function ChatWindow({ conversation, onBack }) {
 
     const [userStatus, setUserStatus] = useState({ isOnline: false, lastSeen: null });
 
+    // Request notification permission on mount
+    useEffect(() => {
+        requestNotificationPermission();
+    }, []);
+
     useEffect(() => {
         const userId = user?._id || user?.id;
         if (!conversation?._id || !userId) return;
 
-        // Initialize Socket.IO
-        const socketUrl = typeof window !== 'undefined'
-            ? (process.env.NEXT_PUBLIC_SITE_URL || window.location.origin)
-            : 'http://localhost:3000';
+        // Initialize Ably
+        import("ably").then((Ably) => {
+            const client = new Ably.Realtime({ authUrl: "/api/ably/auth" });
+            ablyClientRef.current = client;
 
-        const newSocket = io(socketUrl);
-        newSocket.emit("join", userId);
-        setSocket(newSocket);
+            const channel = client.channels.get(`chat:${conversation._id}`);
+            channelRef.current = channel;
 
-        // Fetch messages
+            // Subscribe to messages
+            channel.subscribe("message", (message) => {
+                const msgData = message.data;
+                // Only add if not from self
+                if (msgData.sender?._id !== userId) {
+                    setMessages((prev) => [...prev, msgData]);
+                    scrollToBottom();
+
+                    // Show browser notification for incoming message
+                    const senderName = msgData.sender?.name || "Someone";
+                    const msgContent = msgData.messageType === "text"
+                        ? msgData.content
+                        : msgData.messageType === "image"
+                            ? "📷 Sent a photo"
+                            : msgData.messageType === "voice"
+                                ? "🎤 Sent a voice message"
+                                : "📎 Sent an attachment";
+
+                    showNotification(
+                        `New message from ${senderName}`,
+                        msgContent,
+                        msgData.sender?.landlordProfile?.profileImage
+                    );
+                }
+            });
+
+            // Subscribe to typing
+            channel.subscribe("typing", (message) => {
+                const data = message.data;
+                if (data.userId !== userId) {
+                    setIsTyping(data.isTyping);
+                }
+            });
+
+            // Presence for online status
+            channel.presence.enter({ name: user?.name || "User" });
+
+            const updatePresence = async () => {
+                try {
+                    const members = await channel.presence.get();
+                    const isOtherOnline = members.some(
+                        (m) => m.clientId === otherParticipant?._id
+                    );
+                    setUserStatus((prev) => ({
+                        ...prev,
+                        isOnline: isOtherOnline,
+                        lastSeen: isOtherOnline ? null : prev.lastSeen || new Date(),
+                    }));
+                } catch (err) {
+                    console.error("Presence error:", err);
+                }
+            };
+
+            channel.presence.subscribe("enter", updatePresence);
+            channel.presence.subscribe("leave", (member) => {
+                if (member.clientId === otherParticipant?._id) {
+                    setUserStatus({ isOnline: false, lastSeen: new Date() });
+                }
+            });
+            channel.presence.subscribe("update", updatePresence);
+
+            updatePresence();
+        });
+
         fetchMessages();
 
-        // Request status for other participant via socket
-        if (otherParticipant?._id) {
-            newSocket.emit("request_status", otherParticipant._id);
-        }
-
-        // Listen for new messages
-        newSocket.on("receive_message", (data) => {
-            if (data.conversationId === conversation._id) {
-                setMessages((prev) => [...prev, data.message]);
-                scrollToBottom();
-            }
-        });
-
-        // Listen for typing
-        newSocket.on("user_typing", (data) => {
-            if (data.conversationId === conversation._id) {
-                setIsTyping(data.isTyping);
-            }
-        });
-
-        // Listen for user status updates
-        newSocket.on("user_status", (data) => {
-            if (data.userId === otherParticipant?._id) {
-                setUserStatus(prev => ({
-                    ...prev,
-                    isOnline: data.isOnline,
-                    lastSeen: data.lastSeen || prev.lastSeen
-                }));
-            }
-        });
-
         return () => {
-            newSocket.disconnect();
+            try {
+                if (channelRef.current) {
+                    channelRef.current.unsubscribe();
+                    // Only leave presence if channel is attached
+                    if (channelRef.current.state === 'attached') {
+                        channelRef.current.presence.leave().catch(() => { });
+                    }
+                }
+                if (ablyClientRef.current) {
+                    ablyClientRef.current.close();
+                }
+            } catch (e) {
+                // Ignore cleanup errors
+            }
         };
     }, [conversation?._id, user?._id, user?.id, otherParticipant?._id]);
 
@@ -168,21 +258,12 @@ export default function ChatWindow({ conversation, onBack }) {
             if (res.ok) {
                 const data = await res.json();
                 setMessages((prev) => [...prev, data.message]);
-
-                // Emit via socket
-                if (socket && otherParticipant?._id) {
-                    socket.emit("send_message", {
-                        conversationId: conversation._id,
-                        recipientId: otherParticipant._id,
-                        message: data.message,
-                    });
-                }
-
+                channelRef.current?.publish("message", data.message);
                 scrollToBottom();
             }
         } catch (error) {
             console.error("Error sending message:", error);
-            setNewMessage(messageText); // Restore message on error
+            setNewMessage(messageText);
         } finally {
             setIsSending(false);
         }
@@ -192,7 +273,6 @@ export default function ChatWindow({ conversation, onBack }) {
         const file = e.target.files?.[0];
         if (!file || !conversation?._id) return;
 
-        // Validate file size (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
             alert("File size must be less than 10MB");
             return;
@@ -236,13 +316,7 @@ export default function ChatWindow({ conversation, onBack }) {
                 if (res.ok) {
                     const data = await res.json();
                     setMessages((prev) => [...prev, data.message]);
-                    if (socket && otherParticipant?._id) {
-                        socket.emit("send_message", {
-                            conversationId: conversation._id,
-                            recipientId: otherParticipant._id,
-                            message: data.message,
-                        });
-                    }
+                    channelRef.current?.publish("message", data.message);
                     scrollToBottom();
                 }
             }
@@ -291,13 +365,7 @@ export default function ChatWindow({ conversation, onBack }) {
                 if (res.ok) {
                     const data = await res.json();
                     setMessages((prev) => [...prev, data.message]);
-                    if (socket && otherParticipant?._id) {
-                        socket.emit("send_message", {
-                            conversationId: conversation._id,
-                            recipientId: otherParticipant._id,
-                            message: data.message,
-                        });
-                    }
+                    channelRef.current?.publish("message", data.message);
                     scrollToBottom();
                 }
             }
@@ -327,8 +395,6 @@ export default function ChatWindow({ conversation, onBack }) {
             alert("Failed to delete chat");
         }
     };
-
-    // --- New Features Handlers ---
 
     const handleEditMessage = async () => {
         if (!editingMessage || !newMessage.trim()) return;
@@ -363,7 +429,6 @@ export default function ChatWindow({ conversation, onBack }) {
             });
 
             if (res.ok) {
-                // Remove message from local state
                 setMessages((prev) => prev.filter((m) => m._id !== messageId));
             }
         } catch (error) {
@@ -391,37 +456,28 @@ export default function ChatWindow({ conversation, onBack }) {
     };
 
     const handleTyping = () => {
-        if (!socket || !otherParticipant?._id) return;
-
-        socket.emit("typing", {
-            conversationId: conversation._id,
-            recipientId: otherParticipant._id,
-            isTyping: true,
-        });
+        const userId = user?._id || user?.id;
+        channelRef.current?.publish("typing", { userId, isTyping: true });
 
         if (typingTimeoutRef.current) {
             clearTimeout(typingTimeoutRef.current);
         }
 
         typingTimeoutRef.current = setTimeout(() => {
-            socket?.emit("typing", {
-                conversationId: conversation._id,
-                recipientId: otherParticipant._id,
-                isTyping: false,
-            });
+            channelRef.current?.publish("typing", { userId, isTyping: false });
         }, 1000);
     };
 
     const startEditing = (message) => {
         setEditingMessage(message);
         setNewMessage(message.content);
-        fileInputRef.current?.focus();
+        textareaRef.current?.focus();
     };
 
     return (
-        <div className="flex flex-col h-full bg-white md:rounded-2xl overflow-hidden">
+        <div className="flex flex-col h-full bg-white overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 text-white p-4 flex items-center justify-between shadow-xl border-b-2 border-white/10">
+            <div className="bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 text-white p-4 flex items-center justify-between shadow-xl">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <button
                         onClick={onBack}
@@ -513,7 +569,6 @@ export default function ChatWindow({ conversation, onBack }) {
                                     message={message}
                                     isOwn={message.sender?._id === (user?._id || user?.id)}
                                 />
-                                {/* Message Actions (Edit/Delete) - Only for own text messages */}
                                 {message.sender?._id === (user?._id || user?.id) && (
                                     <div className="absolute -top-3 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 scale-90 group-hover:scale-100 flex gap-0.5 bg-white rounded-full shadow-lg border border-gray-100 p-1 z-20">
                                         {message.messageType === "text" && (
@@ -560,7 +615,7 @@ export default function ChatWindow({ conversation, onBack }) {
             <div className="p-3 bg-white border-t border-gray-100 relative shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex items-end gap-2 z-20">
                 {/* Editing Indicator */}
                 {editingMessage && (
-                    <div className="absolute top-0 left-0 w-full -translate-y-full bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200 p-3 flex items-center justify-between text-sm text-blue-700 shadow-md animate-slideIn z-10">
+                    <div className="absolute top-0 left-0 w-full -translate-y-full bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200 p-3 flex items-center justify-between text-sm text-blue-700 shadow-md z-10">
                         <span className="flex items-center gap-2 font-medium">
                             <Edit2 className="w-4 h-4" />
                             Editing message...
@@ -642,7 +697,7 @@ export default function ChatWindow({ conversation, onBack }) {
                 </div>
 
                 {/* Textarea Input */}
-                <div className="flex-1 bg-gray-100 rounded-[24px] flex items-end border border-transparent focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 transition-all duration-200">
+                <div className="flex-1 bg-gray-50 rounded-full flex items-end transition-all duration-200 shadow-sm hover:shadow-md">
                     <textarea
                         ref={textareaRef}
                         rows={1}
@@ -656,21 +711,20 @@ export default function ChatWindow({ conversation, onBack }) {
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
-                                // Trigger submit programmatically
                                 if (newMessage.trim() && !isSending) {
                                     handleSendMessage(e);
-                                    e.target.style.height = 'auto'; // Reset height
+                                    e.target.style.height = 'auto';
                                 }
                             }
                         }}
                         placeholder={editingMessage ? "Edit message..." : "Type a message..."}
                         disabled={isSending}
-                        className="w-full bg-transparent border-none focus:ring-0 px-4 py-3 max-h-32 resize-none text-sm text-gray-800 placeholder:text-gray-400 leading-relaxed scrollbar-hide"
+                        className="w-full bg-transparent border-none outline-none focus:ring-0 px-5 py-3 max-h-32 resize-none text-[15px] text-gray-800 placeholder:text-gray-400 leading-relaxed scrollbar-hide"
                     />
                     <button
                         type="button"
                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        className="p-2 text-gray-400 hover:text-yellow-500 transition-colors mb-1 mr-1 hover:scale-110 active:scale-95"
+                        className="p-2.5 text-gray-400 hover:text-amber-500 transition-all duration-200 mb-0.5 mr-1 hover:scale-110 active:scale-95"
                     >
                         <Smile className="w-5 h-5" />
                     </button>

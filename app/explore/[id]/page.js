@@ -123,7 +123,7 @@ export default function PropertyDetailPage() {
             Property Not Found
           </h1>
           <p className="text-zinc-600 mb-6">
-            We couldn't find the property you're looking for.
+            We couldn&apos;t find the property you&apos;re looking for.
           </p>
           <Link
             href="/explore"
