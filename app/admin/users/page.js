@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import StatusBadge from "../../components/StatusBadge";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { Eye, CheckCircle, ShieldCheck } from "lucide-react";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -168,22 +170,55 @@ export default function AdminUsersPage() {
                     className="hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <div>
-                        <div className="text-sm sm:text-base font-semibold text-gray-900">
-                          {user.name}
+                      <div className="flex items-center">
+                        {/* Avatar */}
+                        <div className="shrink-0 h-10 w-10 mr-4">
+                          {user.profileImage ? (
+                            <img
+                              className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                              src={user.profileImage}
+                              alt=""
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold border border-blue-200">
+                              {user.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
                         </div>
-                        <div className="text-xs sm:text-sm text-gray-500">
-                          {user.email}
+                        {/* User Info */}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm sm:text-base font-semibold text-gray-900">
+                              {user.name}
+                            </div>
+                            {user.role === "LANDLORD" && user.isVerified && (
+                              <ShieldCheck
+                                className="w-4 h-4 text-blue-600"
+                                title="Verified Landlord"
+                              />
+                            )}
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            {user.email}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4">
-                      <span className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          user.role === "LANDLORD"
+                            ? "bg-purple-100 text-purple-800"
+                            : user.role === "ADMIN"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
                         {user.role}
                       </span>
                     </td>
                     <td className="hidden md:table-cell px-3 sm:px-6 py-3 sm:py-4">
-                      <span className="text-gray-900 font-semibold">
+                      <span className="text-gray-900 font-medium">
                         {user.propertyCount}
                       </span>
                     </td>
@@ -192,7 +227,10 @@ export default function AdminUsersPage() {
                         status={user.suspended ? "suspended" : "active"}
                       />
                       {user.suspended && user.suspensionReason && (
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div
+                          className="text-xs text-gray-500 mt-1 max-w-[150px] truncate"
+                          title={user.suspensionReason}
+                        >
                           {user.suspensionReason}
                         </div>
                       )}
@@ -201,26 +239,36 @@ export default function AdminUsersPage() {
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
-                      {user.role !== "ADMIN" && (
-                        <button
-                          onClick={() =>
-                            user.suspended
-                              ? handleUnsuspend(user.id)
-                              : setConfirmDialog({
-                                  isOpen: true,
-                                  action: "suspend",
-                                  userId: user.id,
-                                })
-                          }
-                          className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-colors ${
-                            user.suspended
-                              ? "bg-green-100 text-green-700 hover:bg-green-200"
-                              : "bg-red-100 text-red-700 hover:bg-red-200"
-                          }`}
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/admin/users/${user.id}`}
+                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="View Profile"
                         >
-                          {user.suspended ? "Unsuspend" : "Suspend"}
-                        </button>
-                      )}
+                          <Eye className="w-4 h-4" />
+                        </Link>
+
+                        {user.role !== "ADMIN" && (
+                          <button
+                            onClick={() =>
+                              user.suspended
+                                ? handleUnsuspend(user.id)
+                                : setConfirmDialog({
+                                    isOpen: true,
+                                    action: "suspend",
+                                    userId: user.id,
+                                  })
+                            }
+                            className={`px-3 py-1.5 rounded-lg font-medium text-xs transition-colors ${
+                              user.suspended
+                                ? "bg-green-50 text-green-600 hover:bg-green-100 border border-green-200"
+                                : "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+                            }`}
+                          >
+                            {user.suspended ? "Unsuspend" : "Suspend"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -79,6 +79,59 @@ const UserSchema = new mongoose.Schema(
         type: Date,
       },
     },
+    // Student-specific profile fields
+    studentProfile: {
+      universityName: {
+        type: String,
+        trim: true,
+        maxlength: [100, "University name cannot exceed 100 characters"],
+      },
+      course: {
+        type: String,
+        trim: true,
+        maxlength: [100, "Course name cannot exceed 100 characters"],
+      },
+      yearOfStudy: {
+        type: String,
+        trim: true,
+        enum: [
+          "1st Year",
+          "2nd Year",
+          "3rd Year",
+          "4th Year",
+          "5th Year",
+          "Postgraduate",
+          "Other",
+        ],
+      },
+      studentId: {
+        type: String,
+        trim: true,
+      },
+      bio: {
+        type: String,
+        trim: true,
+        maxlength: [500, "Bio cannot exceed 500 characters"],
+      },
+      emergencyContact: {
+        name: { type: String, trim: true },
+        relation: { type: String, trim: true },
+        phoneNumber: {
+          type: String,
+          trim: true,
+          match: [/^\d{10}$/, "Phone number must be exactly 10 digits"],
+        },
+      },
+      permanentAddress: {
+        type: String,
+        trim: true,
+        maxlength: [200, "Address cannot exceed 200 characters"],
+      },
+      profileImage: {
+        type: String,
+        trim: true,
+      },
+    },
     isOnline: {
       type: Boolean,
       default: false,

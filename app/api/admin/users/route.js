@@ -20,10 +20,11 @@ export async function GET(req) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
 
-    // Build query
-    const query = {};
+    const query = {
+      role: { $ne: "ADMIN" }, // Exclude admins by default
+    };
 
-    // Filter by role
+    // Filter by role (if specific role requested)
     if (role) {
       query.role = role;
     }
@@ -68,6 +69,12 @@ export async function GET(req) {
           suspendedAt: user.suspendedAt,
           suspensionReason: user.suspensionReason,
           propertyCount,
+          profileImage:
+            user.role === "LANDLORD"
+              ? user.landlordProfile?.profileImage
+              : user.studentProfile?.profileImage,
+          isVerified:
+            user.role === "LANDLORD" ? user.landlordProfile?.isVerified : false,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         };

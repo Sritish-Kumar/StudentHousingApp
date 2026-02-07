@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { isLandlord } from "@/app/lib/auth";
+import { isAuthenticated } from "@/app/lib/auth";
 import { uploadImagesToCloudinary } from "@/app/backend/utils/uploadToCloudinary";
 
 export async function POST(req) {
   try {
-    // 1. Authentication Check (Landlord only)
-    const user = await isLandlord(req);
+    // 1. Authentication Check (Any authenticated user)
+    const user = await isAuthenticated(req);
 
     // 2. Parse multipart form data
     const formData = await req.formData();
