@@ -83,7 +83,7 @@ export async function DELETE(req, { params }) {
         }
 
         if (deleteForEveryone) {
-            // Logic for "Delete for Everyone"
+            // Logic for "Delete for Everyone" - Hard delete
             if (message.sender.toString() !== user.id) {
                 return NextResponse.json(
                     { message: "You can only delete your own messages for everyone" },
@@ -91,26 +91,7 @@ export async function DELETE(req, { params }) {
                 );
             }
 
-            // We don't actually delete the document to preserve sync, just clear content
-            // Or we can delete properly. Let's delete properly for now, 
-            // but client needs to handle "message deleted" UI.
-            // Actually, standard practice is to replace content with "This message was deleted" or allow hard delete.
-            // For simplicity and sync, let's hard delete.
-            await Message.findByIdAndDelete(id);
-
-            // Update conversation lastMessage if needed? 
-            // This is complex. Let's stick to soft delete via 'deletedFor' for now, 
-            // but for "Delete for Everyone", maybe we add a 'deletedForEveryone' flag or just remove content.
-            // Let's go with removing content.
-
-            // message.content = "This message was deleted";
-            // message.messageType = "text"; // Reset type if it was image
-            // message.fileUrl = undefined;
-            // message.isDeleted = true; // Need to add this to schema if we want purely soft delete
-            // await message.save();
-
-            // Actually, the user asked for "Message editing and deletion".
-            // Let's implement hard delete for everyone for now as it's cleaner for MVP.
+            // Hard delete - remove message from database
             await Message.findByIdAndDelete(id);
 
             return NextResponse.json({ message: "Message deleted for everyone" }, { status: 200 });

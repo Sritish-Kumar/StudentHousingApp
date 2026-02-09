@@ -73,12 +73,10 @@ export default function ChatWindow({ conversation, onBack }) {
     const [isSending, setIsSending] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [editingMessage, setEditingMessage] = useState(null);
-    const [showAttachMenu, setShowAttachMenu] = useState(false);
 
     const messagesEndRef = useRef(null);
     const textareaRef = useRef(null);
     const fileInputRef = useRef(null);
-    const docInputRef = useRef(null);
     const typingTimeoutRef = useRef(null);
 
     // Ably refs
@@ -224,6 +222,11 @@ export default function ChatWindow({ conversation, onBack }) {
         }
     };
 
+    // Auto-scroll to bottom when messages change
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -239,6 +242,7 @@ export default function ChatWindow({ conversation, onBack }) {
 
         setIsSending(true);
         const messageText = newMessage.trim();
+
         setNewMessage("");
         setShowEmojiPicker(false);
 
@@ -564,32 +568,13 @@ export default function ChatWindow({ conversation, onBack }) {
                 ) : (
                     <>
                         {messages.map((message) => (
-                            <div key={message._id} className="relative group">
-                                <MessageBubble
-                                    message={message}
-                                    isOwn={message.sender?._id === (user?._id || user?.id)}
-                                />
-                                {message.sender?._id === (user?._id || user?.id) && (
-                                    <div className="absolute -top-3 right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 scale-90 group-hover:scale-100 flex gap-0.5 bg-white rounded-full shadow-lg border border-gray-100 p-1 z-20">
-                                        {message.messageType === "text" && (
-                                            <button
-                                                onClick={() => startEditing(message)}
-                                                className="p-1.5 hover:bg-blue-50 rounded-full text-gray-500 hover:text-blue-600 transition-colors"
-                                                title="Edit"
-                                            >
-                                                <Edit2 className="w-3.5 h-3.5" />
-                                            </button>
-                                        )}
-                                        <button
-                                            onClick={() => handleDeleteMessage(message._id)}
-                                            className="p-1.5 hover:bg-red-50 rounded-full text-gray-500 hover:text-red-500 transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                            <MessageBubble
+                                key={message._id}
+                                message={message}
+                                isOwn={message.sender?._id === (user?._id || user?.id)}
+                                onEdit={(msg) => startEditing(msg)}
+                                onDelete={(msg) => handleDeleteMessage(msg._id)}
+                            />
                         ))}
                         {isTyping && (
                             <div className="flex items-center gap-2 mb-2">
@@ -612,10 +597,10 @@ export default function ChatWindow({ conversation, onBack }) {
             </div>
 
             {/* Input Area */}
-            <div className="p-3 bg-white border-t border-gray-100 relative shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex items-end gap-2 z-20">
+            <div className="bg-white border-t border-gray-100 relative shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20">
                 {/* Editing Indicator */}
                 {editingMessage && (
-                    <div className="absolute top-0 left-0 w-full -translate-y-full bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200 p-3 flex items-center justify-between text-sm text-blue-700 shadow-md z-10">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b-2 border-blue-200 p-3 flex items-center justify-between text-sm text-blue-700">
                         <span className="flex items-center gap-2 font-medium">
                             <Edit2 className="w-4 h-4" />
                             Editing message...
@@ -633,6 +618,7 @@ export default function ChatWindow({ conversation, onBack }) {
                     </div>
                 )}
 
+
                 {/* Emoji Picker */}
                 {showEmojiPicker && (
                     <div className="absolute bottom-full right-0 mb-4 mr-4 z-50 shadow-2xl rounded-xl overflow-hidden animate-fadeIn">
@@ -647,7 +633,7 @@ export default function ChatWindow({ conversation, onBack }) {
                     </div>
                 )}
 
-                {/* Hidden File Inputs */}
+                {/* Hidden File Input */}
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -655,108 +641,78 @@ export default function ChatWindow({ conversation, onBack }) {
                     accept="image/*"
                     className="hidden"
                 />
-                <input
-                    type="file"
-                    ref={docInputRef}
-                    onChange={(e) => handleFileUpload(e, "file")}
-                    accept=".pdf,.doc,.docx,.txt"
-                    className="hidden"
-                />
 
-                {/* Attachment Menu Button */}
-                <div className="relative pb-1">
-                    <button
-                        type="button"
-                        onClick={() => setShowAttachMenu(!showAttachMenu)}
-                        className={`p-2.5 rounded-full transition-all duration-300 ${showAttachMenu ? "bg-blue-100 text-blue-600 rotate-45" : "text-gray-500 hover:bg-gray-100 hover:text-blue-600"}`}
-                    >
-                        <Plus className="w-6 h-6" />
-                    </button>
-
-                    {showAttachMenu && (
-                        <>
-                            <div className="fixed inset-0 z-40" onClick={() => setShowAttachMenu(false)}></div>
-                            <div className="absolute bottom-full left-0 mb-4 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 min-w-[180px] flex flex-col gap-1 animate-fadeIn z-50 origin-bottom-left">
-                                <button
-                                    onClick={() => { fileInputRef.current?.click(); setShowAttachMenu(false); }}
-                                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl text-gray-700 w-full text-left transition-colors"
-                                >
-                                    <div className="p-2 bg-blue-100 text-blue-600 rounded-full shadow-sm"><ImageIcon className="w-4 h-4" /></div>
-                                    <span className="font-medium text-sm">Photos & Videos</span>
-                                </button>
-                                <button
-                                    onClick={() => { docInputRef.current?.click(); setShowAttachMenu(false); }}
-                                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl text-gray-700 w-full text-left transition-colors"
-                                >
-                                    <div className="p-2 bg-indigo-100 text-indigo-600 rounded-full shadow-sm"><Paperclip className="w-4 h-4" /></div>
-                                    <span className="font-medium text-sm">Document</span>
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* Textarea Input */}
-                <div className="flex-1 bg-gray-50 rounded-full flex items-end transition-all duration-200 shadow-sm hover:shadow-md">
-                    <textarea
-                        ref={textareaRef}
-                        rows={1}
-                        value={newMessage}
-                        onChange={(e) => {
-                            setNewMessage(e.target.value);
-                            e.target.style.height = 'auto';
-                            e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
-                            handleTyping();
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                if (newMessage.trim() && !isSending) {
-                                    handleSendMessage(e);
-                                    e.target.style.height = 'auto';
+                {/* Main Input Row */}
+                <div className="p-3 flex items-end gap-2">
+                    {/* Textarea Input */}
+                    <div className="flex-1 bg-gray-50 rounded-full flex items-end transition-all duration-200 shadow-sm hover:shadow-md">
+                        <textarea
+                            ref={textareaRef}
+                            rows={1}
+                            value={newMessage}
+                            onChange={(e) => {
+                                setNewMessage(e.target.value);
+                                e.target.style.height = 'auto';
+                                e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                                handleTyping();
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    if (newMessage.trim() && !isSending) {
+                                        handleSendMessage(e);
+                                        e.target.style.height = 'auto';
+                                    }
                                 }
-                            }
-                        }}
-                        placeholder={editingMessage ? "Edit message..." : "Type a message..."}
-                        disabled={isSending}
-                        className="w-full bg-transparent border-none outline-none focus:ring-0 px-5 py-3 max-h-32 resize-none text-[15px] text-gray-800 placeholder:text-gray-400 leading-relaxed scrollbar-hide"
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        className="p-2.5 text-gray-400 hover:text-amber-500 transition-all duration-200 mb-0.5 mr-1 hover:scale-110 active:scale-95"
-                    >
-                        <Smile className="w-5 h-5" />
-                    </button>
-                </div>
-
-                {/* Send / Mic Button */}
-                <div className="pb-1">
-                    {newMessage.trim() === "" && !editingMessage ? (
+                            }}
+                            placeholder={editingMessage ? "Edit message..." : "Type a message..."}
+                            disabled={isSending}
+                            className="w-full bg-transparent border-none outline-none focus:ring-0 px-5 py-3 max-h-32 resize-none text-[15px] text-gray-800 placeholder:text-gray-400 leading-relaxed scrollbar-hide"
+                        />
                         <button
                             type="button"
-                            onClick={() => setShowVoiceRecorder(true)}
-                            disabled={isSending}
-                            className="p-3 text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 disabled:opacity-50 hover:scale-110 active:scale-95 shadow-sm"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="p-2.5 text-gray-400 hover:text-blue-500 transition-all duration-200 mb-0.5 hover:scale-110 active:scale-95"
                         >
-                            <Mic className="w-6 h-6" />
+                            <ImageIcon className="w-5 h-5" />
                         </button>
-                    ) : (
                         <button
-                            onClick={(e) => {
-                                handleSendMessage(e);
-                                if (textareaRef.current) textareaRef.current.style.height = 'auto';
-                            }}
-                            disabled={!newMessage.trim() || isSending}
-                            className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex-shrink-0"
+                            type="button"
+                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            className="p-2.5 text-gray-400 hover:text-amber-500 transition-all duration-200 mb-0.5 mr-1 hover:scale-110 active:scale-95"
                         >
-                            {isSending ? (
-                                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
-                                editingMessage ? <Edit2 className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />
-                            )}
+                            <Smile className="w-5 h-5" />
                         </button>
-                    )}
+                    </div>
+
+                    {/* Send / Mic Button */}
+                    <div className="pb-1">
+                        {newMessage.trim() === "" && !editingMessage ? (
+                            <button
+                                type="button"
+                                onClick={() => setShowVoiceRecorder(true)}
+                                disabled={isSending}
+                                className="p-3 text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 disabled:opacity-50 hover:scale-110 active:scale-95 shadow-sm"
+                            >
+                                <Mic className="w-6 h-6" />
+                            </button>
+                        ) : (
+                            <button
+                                onClick={(e) => {
+                                    handleSendMessage(e);
+                                    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+                                }}
+                                disabled={!newMessage.trim() || isSending}
+                                className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex-shrink-0"
+                            >
+                                {isSending ? (
+                                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    editingMessage ? <Edit2 className="w-5 h-5" /> : <Send className="w-5 h-5 ml-0.5" />
+                                )}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 

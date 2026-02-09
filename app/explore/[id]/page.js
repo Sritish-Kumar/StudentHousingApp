@@ -558,46 +558,49 @@ export default function PropertyDetailPage() {
                       <button className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-blue-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
                         Book Now
                       </button>
-                      <button
-                        onClick={async () => {
-                          if (!user) {
-                            alert("Please login to contact the landlord");
-                            return;
-                          }
-                          if (!landlord || !landlord._id) {
-                            alert("Landlord information not available");
-                            return;
-                          }
-                          try {
-                            const res = await fetch("/api/conversations", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                propertyId: property._id,
-                                landlordId: landlord._id,
-                              }),
-                            });
-                            if (res.ok) {
-                              const data = await res.json();
-                              // Dispatch event to open chat
-                              const event = new CustomEvent("openChat", {
-                                detail: { conversation: data.conversation }
-                              });
-                              window.dispatchEvent(event);
-                            } else {
-                              const error = await res.json();
-                              console.error("Failed to start conversation:", error);
-                              alert(`Failed to start conversation: ${error.message || 'Unknown error'}`);
+                      {/* Only show Contact Landlord for students (hide for all landlords) */}
+                      {user && landlord && landlord._id && user.role !== 'LANDLORD' && user.role !== 'landlord' && (user._id !== landlord._id && user.id !== landlord._id) && (
+                        <button
+                          onClick={async () => {
+                            if (!user) {
+                              alert("Please login to contact the landlord");
+                              return;
                             }
-                          } catch (error) {
-                            console.error("Error starting conversation:", error);
-                            alert("Failed to start conversation");
-                          }
-                        }}
-                        className="w-full bg-white text-zinc-700 border-2 border-gray-200 py-4 rounded-xl font-bold text-lg hover:border-blue-600 hover:text-blue-600 transition-all"
-                      >
-                        Contact Landlord
-                      </button>
+                            if (!landlord || !landlord._id) {
+                              alert("Landlord information not available");
+                              return;
+                            }
+                            try {
+                              const res = await fetch("/api/conversations", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  propertyId: property._id,
+                                  landlordId: landlord._id,
+                                }),
+                              });
+                              if (res.ok) {
+                                const data = await res.json();
+                                // Dispatch event to open chat
+                                const event = new CustomEvent("openChat", {
+                                  detail: { conversation: data.conversation }
+                                });
+                                window.dispatchEvent(event);
+                              } else {
+                                const error = await res.json();
+                                console.error("Failed to start conversation:", error);
+                                alert(`Failed to start conversation: ${error.message || 'Unknown error'}`);
+                              }
+                            } catch (error) {
+                              console.error("Error starting conversation:", error);
+                              alert("Failed to start conversation");
+                            }
+                          }}
+                          className="w-full bg-white text-zinc-700 border-2 border-gray-200 py-4 rounded-xl font-bold text-lg hover:border-blue-600 hover:text-blue-600 transition-all"
+                        >
+                          Contact Landlord
+                        </button>
+                      )}
                     </div>
 
                     <p className="text-center text-xs text-zinc-400 mt-6">

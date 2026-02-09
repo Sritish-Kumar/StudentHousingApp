@@ -31,6 +31,11 @@ export async function GET(req, { params }) {
         })
             .populate("sender", "name email landlordProfile")
             .sort({ createdAt: -1 })
+            .populate("replyTo", "content messageType sender fileUrl")
+            .populate({
+                path: "replyTo",
+                populate: { path: "sender", select: "name" }
+            })
             .skip((page - 1) * limit)
             .limit(limit);
 
@@ -71,7 +76,7 @@ export async function POST(req, { params }) {
         }
 
         const { id } = params;
-        const { messageType, content, fileUrl, filePublicId, duration } =
+        const { messageType, content, fileUrl, filePublicId, duration, replyTo } =
             await req.json();
 
         await connectDB();
@@ -91,6 +96,7 @@ export async function POST(req, { params }) {
             fileUrl,
             filePublicId,
             duration,
+            replyTo,
             readBy: [user.id],
         });
 

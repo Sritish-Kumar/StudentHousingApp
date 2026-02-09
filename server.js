@@ -98,8 +98,9 @@ app.prepare().then(async () => {
     });
 
     const PORT = process.env.PORT || 3000;
-    server.listen(PORT, (err) => {
+    server.listen(PORT, "0.0.0.0", (err) => {
         if (err) throw err;
         console.log(`> Ready on http://localhost:${PORT}`);
+        console.log(`> Network access: http://192.168.1.8:${PORT}`);
     });
 });

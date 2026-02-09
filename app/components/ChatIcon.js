@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 
 // Dynamic import to avoid SSR issues
@@ -26,13 +27,15 @@ export default function ChatIcon() {
             const res = await fetch("/api/conversations");
             if (res.ok) {
                 const data = await res.json();
-                if (data.conversations) {
-                    const total = data.conversations.reduce(
-                        (sum, conv) => sum + (conv.unreadCount?.[user?._id || user?.id] || 0),
-                        0
-                    );
-                    setUnreadCount(total);
-                }
+                const total = data.conversations.reduce(
+                    (sum, conv) => {
+                        // Ignore conversations with no messages (they can't have unread messages)
+                        if (!conv.lastMessage) return sum;
+                        return sum + (conv.unreadCount?.[user?._id || user?.id] || 0);
+                    },
+                    0
+                );
+                setUnreadCount(total);
             }
         } catch (error) {
             // Silent fail - don't break the app
@@ -64,8 +67,14 @@ export default function ChatIcon() {
         }
     }, [user, isMounted]);
 
-    // Don't render during SSR or if user not logged in
-    if (!isMounted || !user) return null;
+    // Get current pathname
+    const pathname = usePathname();
+
+    // Hide chat on map/navigation pages
+    const isMapPage = pathname?.startsWith('/navigate') || pathname === '/map';
+
+    // Don't render during SSR, if user not logged in, or on map pages
+    if (!isMounted || !user || isMapPage) return null;
 
     return (
         <>
