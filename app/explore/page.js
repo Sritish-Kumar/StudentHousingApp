@@ -29,7 +29,7 @@ export default function ExplorePage() {
     maxDistance: null,
     gender: "",
     amenities: [],
-    verified: true, // Default to showing only verified properties
+    verified: true,
   });
 
   const [userLocation, setUserLocation] = useState(null);
@@ -58,7 +58,7 @@ export default function ExplorePage() {
         });
       case "newest":
       default:
-        return sorted; // Already sorted by createdAt desc from API
+        return sorted;
     }
   };
 
@@ -66,22 +66,18 @@ export default function ExplorePage() {
     setIsLoading(true);
     setLocationError(null);
     try {
-      // Build query params
       const params = new URLSearchParams();
 
       if (filters.priceMin) params.append("priceMin", filters.priceMin);
       if (filters.priceMax) params.append("priceMax", filters.priceMax);
       if (filters.maxDistance) params.append("distance", filters.maxDistance);
       if (filters.gender) params.append("gender", filters.gender);
-      // Always send verified parameter - true or false
       params.append("verified", filters.verified ? "true" : "false");
       if (searchTerm) params.append("college", searchTerm);
 
-      // Add geolocation params if user location is available
       if (userLocation) {
         params.append("lat", userLocation.lat);
         params.append("lng", userLocation.lng);
-        // No radius - we want ALL properties sorted by distance
       }
 
       const response = await fetch(`/api/properties?${params.toString()}`);
@@ -89,7 +85,6 @@ export default function ExplorePage() {
       if (response.ok) {
         let data = await response.json();
 
-        // Apply client-side sorting only if NOT using geolocation (API auto-sorts by distance)
         if (!userLocation) {
           data = sortProperties(data, sortBy);
         }
@@ -124,7 +119,6 @@ export default function ExplorePage() {
         };
         setUserLocation(location);
         setIsLocating(false);
-        // Clear search term when using location to avoid conflicts
         setSearchTerm("");
       },
       (error) => {
@@ -155,16 +149,13 @@ export default function ExplorePage() {
     );
   };
 
-  // Check authentication - redirect if not logged in
   useEffect(() => {
     console.log("Auth check - authLoading:", authLoading, "user:", user);
     if (!authLoading) {
       if (!user) {
         console.log("No user detected, redirecting to home...");
-        // Set flag for login modal
         sessionStorage.setItem("showLoginModal", "true");
         console.log("SessionStorage set, redirecting now...");
-        // Redirect immediately
         window.location.href = "/";
       } else {
         console.log("User is authenticated:", user);
@@ -172,7 +163,6 @@ export default function ExplorePage() {
     }
   }, [user, authLoading]);
 
-  // Fetch Suggestions
   useEffect(() => {
     if (debouncedSearch && debouncedSearch.length > 1) {
       const fetchSuggestions = async () => {
@@ -194,17 +184,15 @@ export default function ExplorePage() {
     }
   }, [debouncedSearch]);
 
-  // Fetch properties from API
   useEffect(() => {
     fetchProperties();
   }, [filters, sortBy, userLocation]);
 
-  // Don't render anything while checking auth or if not authenticated
   if (authLoading || !user) {
     console.log("Showing loading - authLoading:", authLoading, "user:", user);
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-white">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
             <p className="mt-4 text-gray-600">Loading...</p>
@@ -213,8 +201,6 @@ export default function ExplorePage() {
       </Layout>
     );
   }
-
-
 
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
@@ -227,7 +213,7 @@ export default function ExplorePage() {
       maxDistance: null,
       gender: "",
       amenities: [],
-      verified: true, // Keep verified as true even when clearing filters
+      verified: true,
     });
     setSearchTerm("");
   };
@@ -237,202 +223,103 @@ export default function ExplorePage() {
     fetchProperties();
   };
 
-  // Count active filters (don't count verified=true as an active filter since it's default)
   const activeFilterCount = [
     filters.priceMin !== null,
     filters.maxDistance !== null,
     filters.gender !== "",
     filters.amenities?.length > 0,
-    filters.verified === false, // Only count as active if user explicitly wants unverified
+    filters.verified === false,
   ].filter(Boolean).length;
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white pt-20">
-        {/* Header Section */}
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-4">
-              Explore Properties
-            </h1>
-            <p className="text-xl text-blue-100 mb-8">
-              Find your perfect student home near campus
-            </p>
-
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="max-w-2xl relative z-10">
-              <div className="relative group">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setShowSuggestions(true);
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                  placeholder="Search by college, title, or keyword..."
-                  className="w-full px-6 py-4 text-lg border-2 border-white/20 bg-white/10 backdrop-blur-md rounded-2xl focus:border-white focus:outline-none transition-all duration-300 text-white placeholder-blue-200"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-2 bg-white text-blue-600 px-6 py-2 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300"
-                >
-                  Search
-                </button>
-
-                {/* Autocomplete Dropdown */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-FULL left-0 w-full mt-2 bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 animate-in fade-in slide-in-from-top-2">
-                    <div className="py-2">
-                      <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                        Suggestions
-                      </div>
-                      {suggestions.map((suggestion) => (
-                        <div
-                          key={suggestion._id}
-                          onClick={() => {
-                            setSearchTerm(suggestion.title);
-                            setShowSuggestions(false);
-                            // Optional: Navigate directly
-                            window.location.href = `/explore/${suggestion._id}`;
-                          }}
-                          className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between group/item transition-colors"
-                        >
-                          <div>
-                            <div className="font-medium text-gray-900 group-hover/item:text-blue-600">
-                              {suggestion.title}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {suggestion.college}
-                            </div>
-                          </div>
-                          <svg
-                            className="w-5 h-5 text-gray-300 group-hover/item:text-blue-500 opacity-0 group-hover/item:opacity-100 transition-all"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </form>
+      <div className="min-h-screen bg-white pt-16">
+        {/* Breadcrumb */}
+        <div className="border-b border-gray-200 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <a href="/" className="hover:text-blue-600 transition-colors">Home</a>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              <span className="text-gray-900 font-medium">Explore Properties</span>
+            </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Mobile Filter Button */}
-            <div className="lg:hidden">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between font-semibold text-zinc-900 hover:border-blue-300 transition-colors"
-              >
-                <span className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            {/* Sidebar - Desktop */}
+            <aside className="hidden lg:block lg:w-64 flex-shrink-0">
+              <div className="sticky top-24">
+                <FilterSidebar
+                  filters={filters}
+                  onFilterChange={setFilters}
+                  onClearFilters={handleClearFilters}
+                  activeFilterCount={activeFilterCount}
+                  userLocation={userLocation}
+                  isLocating={isLocating}
+                  locationError={locationError}
+                  onNearbyMe={handleNearbyMe}
+                  onClearLocation={() => setUserLocation(null)}
+                />
+              </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <main className="flex-1 min-w-0">
+              {/* Mobile Filter Toggle */}
+              <div className="lg:hidden mb-4">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 flex items-center justify-between text-gray-900 font-medium hover:bg-gray-50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    Filters
+                    {activeFilterCount > 0 && (
+                      <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                        {activeFilterCount}
+                      </span>
+                    )}
+                  </span>
                   <svg
-                    className="w-5 h-5"
+                    className={`w-5 h-5 transition-transform ${showFilters ? "rotate-180" : ""}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                  Filters
-                  {activeFilterCount > 0 && (
-                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </span>
-                <svg
-                  className={`w-5 h-5 transition-transform ${showFilters ? "rotate-180" : ""}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
+                </button>
 
-              {/* Mobile Filter Sidebar */}
-              {showFilters && (
-                <div className="mt-4">
-                  <FilterSidebar
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                    onClearFilters={handleClearFilters}
-                    activeFilterCount={activeFilterCount}
-                    userLocation={userLocation}
-                    isLocating={isLocating}
-                    locationError={locationError}
-                    onNearbyMe={handleNearbyMe}
-                    onClearLocation={() => setUserLocation(null)}
-                  />
-                </div>
-              )}
-            </div>
+                {showFilters && (
+                  <div className="mt-4">
+                    <FilterSidebar
+                      filters={filters}
+                      onFilterChange={handleFilterChange}
+                      onClearFilters={handleClearFilters}
+                      activeFilterCount={activeFilterCount}
+                      userLocation={userLocation}
+                      isLocating={isLocating}
+                      locationError={locationError}
+                      onNearbyMe={handleNearbyMe}
+                      onClearLocation={() => setUserLocation(null)}
+                    />
+                  </div>
+                )}
+              </div>
 
-            {/* Desktop Filter Sidebar */}
-            <aside className="hidden lg:block lg:w-80 flex-shrink-0">
-              <FilterSidebar
-                filters={filters}
-                onFilterChange={setFilters}
-                onClearFilters={handleClearFilters}
-                activeFilterCount={activeFilterCount}
-                userLocation={userLocation}
-                isLocating={isLocating}
-                locationError={locationError}
-                onNearbyMe={handleNearbyMe}
-                onClearLocation={() => setUserLocation(null)}
-              />
-            </aside>
-
-            {/* Properties Grid */}
-            <main className="flex-1">
-              {/* Results Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-                <h2 className="text-2xl font-bold text-zinc-900">
+              {/* Results Count */}
+              <div className="mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {isLoading
-                    ? "Loading..."
+                    ? "Loading properties..."
                     : `${properties.length} ${properties.length === 1 ? "property" : "properties"} found`}
-                </h2>
-
-                {/* Sort Dropdown */}
-                <div className="flex items-center gap-3">
-                  <label className="text-sm font-semibold text-zinc-700">
-                    Sort by:
-                  </label>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-600 focus:outline-none bg-white"
-                  >
-                    <option value="newest">Newest First</option>
-                    <option value="distance">Closest First</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                  </select>
-                </div>
+                </h1>
               </div>
 
               {/* Loading State */}
@@ -440,7 +327,7 @@ export default function ExplorePage() {
                 <div className="flex items-center justify-center py-20">
                   <div className="text-center">
                     <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
-                    <p className="mt-4 text-zinc-600">Loading properties...</p>
+                    <p className="mt-4 text-gray-600">Loading properties...</p>
                   </div>
                 </div>
               )}
@@ -449,15 +336,15 @@ export default function ExplorePage() {
               {!isLoading && properties.length === 0 && (
                 <div className="text-center py-20">
                   <div className="text-6xl mb-4">🏠</div>
-                  <h3 className="text-2xl font-bold text-zinc-900 mb-2">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
                     No properties found
                   </h3>
-                  <p className="text-zinc-600 mb-6">
+                  <p className="text-gray-600 mb-6">
                     Try adjusting your filters or search criteria
                   </p>
                   <button
                     onClick={handleClearFilters}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
                   >
                     Clear All Filters
                   </button>
@@ -466,7 +353,7 @@ export default function ExplorePage() {
 
               {/* Properties Grid */}
               {!isLoading && properties.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                   {properties.map((property) => (
                     <PropertyCard key={property.id} property={property} />
                   ))}
