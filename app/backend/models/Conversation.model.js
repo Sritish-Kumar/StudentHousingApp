@@ -62,11 +62,9 @@ conversationSchema.index({ participants: 1 });
 conversationSchema.index({ property: 1 });
 conversationSchema.index({ lastMessageAt: -1 });
 
-// Ensure unique conversation per property between two users (only for 1-on-1)
-conversationSchema.index(
-    { participants: 1, property: 1 },
-    { unique: true, partialFilterExpression: { isGroup: false } }
-);
+// Note: We DON'T create a unique index on participants + property
+// because multiple students should be able to contact the same landlord about the same property
+// We handle conversation uniqueness per student-landlord pair in application code
 
 const Conversation =
     mongoose.models.Conversation ||

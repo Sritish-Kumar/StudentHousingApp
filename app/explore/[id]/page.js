@@ -56,9 +56,9 @@ export default function PropertyDetailPage() {
           console.log("Fetched landlord data:", landlordData);
           // Handle both cases: landlordData.profile or landlordData directly
           const landlordInfo = landlordData.profile || landlordData;
-          // Ensure we have the _id field
-          if (landlordInfo && !landlordInfo._id && data.owner) {
-            landlordInfo._id = data.owner;
+          // Ensure we have the _id field 
+          if (landlordInfo) {
+            landlordInfo._id = landlordInfo._id || landlordInfo.id || data.owner;
           }
           setLandlord(landlordInfo);
           console.log("Set landlord:", landlordInfo);
