@@ -37,7 +37,7 @@ export default function Footer() {
             <FooterCol
               title="Company"
               links={[
-                { label: "About Us", href: "/" },
+                { label: "About Us", href: "/about" },
                 { label: "Support", href: "/contact" },
               ]}
             />

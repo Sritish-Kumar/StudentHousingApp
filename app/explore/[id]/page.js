@@ -8,7 +8,8 @@ import PropertyMap from "../../components/PropertyMap";
 import BookingModal from "../../components/BookingModal";
 import { useAuth } from "../../context/AuthContext";
 import { getPublicLandlordProfile } from "../../services/landlordService";
-import { CheckCircle, Calendar } from "lucide-react";
+import { CheckCircle, Calendar, ChevronLeft, ChevronRight, BedDouble, Bath, Ruler, Car, Sparkles, Home, FileText, List, MapPin } from "lucide-react";
+
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -231,6 +232,21 @@ export default function PropertyDetailPage() {
       </Layout>
     );
   }
+  // Property meta items
+  const {
+    bedrooms = 0,
+    bathrooms = 0,
+    sqft = 0,
+    garage = 0,
+  } = property || {};
+
+  const metaItems = [
+    { icon: BedDouble, value: bedrooms, label: bedrooms === 1 ? "Bedroom" : "Bedrooms" },
+    { icon: Bath, value: bathrooms, label: bathrooms === 1 ? "Bathroom" : "Bathrooms" },
+    { icon: Ruler, value: sqft, label: "sq ft" },
+    { icon: Car, value: garage, label: garage === 1 ? "Garage" : "Garages" },
+  ];
+
   const totalImages = property?.images?.length || 0;
 
   const goToNext = () => {
@@ -245,67 +261,86 @@ export default function PropertyDetailPage() {
     <Layout>
       <div className="bg-gray-50 min-h-screen pt-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 space-y-10">
-          <div className="relative rounded-3xl overflow-hidden border border-gray-200 shadow-[0_20px_60px_rgba(0,0,0,0.08)]">
-            <div className="relative h-[420px] md:h-[520px] bg-black">
+          <div className="relative rounded-3xl overflow-hidden border border-gray-200 shadow-[0_25px_70px_rgba(0,0,0,0.08)] bg-white">
+
+            {/* ================= MAIN IMAGE ================= */}
+            <div className="relative h-[420px] md:h-[540px] bg-gradient-to-br from-gray-100 to-gray-200">
+
               {/* Image */}
               <img
                 key={currentImageIndex}
                 src={property.images[currentImageIndex]}
                 alt={`Property image ${currentImageIndex + 1}`}
-                className="w-full h-full object-contain transition-opacity duration-500 ease-in-out"
+                className="w-full h-full object-contain transition-all duration-500 ease-in-out"
               />
 
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+              {/* Premium Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
 
-              {/* Navigation Buttons */}
+              {/* ================= NAVIGATION ================= */}
               {totalImages > 1 && (
                 <>
+                  {/* Previous */}
                   <button
                     onClick={goToPrev}
                     aria-label="Previous image"
-                    className="absolute left-6 top-1/2 -translate-y-1/2
-                     bg-white/20 backdrop-blur-md border border-white/30
-                     text-white p-3 rounded-full
-                     hover:bg-white/30 active:scale-95
-                     transition-all duration-200"
+                    className="group absolute left-6 top-1/2 -translate-y-1/2
+                     bg-white/10 backdrop-blur-xl
+                     border border-white/20
+                     text-white
+                     p-3 rounded-full
+                     shadow-lg
+                     hover:bg-white/20
+                     active:scale-95
+                     transition-all duration-300"
                   >
-                    ←
+                    <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-0.5" />
                   </button>
 
+                  {/* Next */}
                   <button
                     onClick={goToNext}
                     aria-label="Next image"
-                    className="absolute right-6 top-1/2 -translate-y-1/2
-                     bg-white/20 backdrop-blur-md border border-white/30
-                     text-white p-3 rounded-full
-                     hover:bg-white/30 active:scale-95
-                     transition-all duration-200"
+                    className="group absolute right-6 top-1/2 -translate-y-1/2
+                     bg-white/10 backdrop-blur-xl
+                     border border-white/20
+                     text-white
+                     p-3 rounded-full
+                     shadow-lg
+                     hover:bg-white/20
+                     active:scale-95
+                     transition-all duration-300"
                   >
-                    →
+                    <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-0.5" />
                   </button>
                 </>
               )}
 
-              {/* Counter */}
+              {/* ================= COUNTER ================= */}
               {totalImages > 1 && (
-                <div className="absolute bottom-6 right-6 bg-white/20 backdrop-blur-md border border-white/30 px-4 py-1.5 rounded-full text-white text-sm font-medium">
+                <div className="absolute bottom-6 right-6
+                      bg-black/40 backdrop-blur-xl
+                      border border-white/20
+                      text-white text-sm font-medium font-nunito
+                      px-4 py-1.5 rounded-full shadow-md">
                   {currentImageIndex + 1} / {totalImages}
                 </div>
               )}
             </div>
 
-            {/* Thumbnails Strip */}
+
+            {/* ================= THUMBNAILS ================= */}
             {totalImages > 1 && (
-              <div className="bg-white px-6 py-4 flex gap-3 overflow-x-auto scrollbar-hide">
+              <div className="bg-white px-6 py-5 flex gap-4 overflow-x-auto scrollbar-hide">
+
                 {property.images.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`relative w-24 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all duration-300
+                    className={`relative w-24 h-16 rounded-xl overflow-hidden flex-shrink-0 transition-all duration-300
             ${currentImageIndex === index
-                        ? "border-blue-600 scale-105"
-                        : "border-gray-200 opacity-70 hover:opacity-100"
+                        ? "ring-2 ring-blue-600/90 scale-105 shadow-md"
+                        : "opacity-70 hover:opacity-100"
                       }`}
                   >
                     <img
@@ -313,10 +348,17 @@ export default function PropertyDetailPage() {
                       alt={`Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
+
+                    {/* Active Overlay */}
+                    {currentImageIndex === index && (
+                      <div className="absolute inset-0 border-2 border-blue-600/80 rounded-xl pointer-events-none" />
+                    )}
                   </button>
                 ))}
+
               </div>
             )}
+
           </div>
 
           {/* Content Grid */}
@@ -373,7 +415,8 @@ export default function PropertyDetailPage() {
 
               {/* ===== PROPERTY HIGHLIGHTS ===== */}
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-900 mb-6">
+                <h2 className="flex items-center gap-2.5 text-lg font-semibold text-gray-900 mb-6 font-poppins">
+                  <Sparkles className="w-5 h-5 text-blue-600" />
                   Property Highlights
                 </h2>
 
@@ -464,9 +507,28 @@ export default function PropertyDetailPage() {
                 </div>
               </div>
 
+              {/* ===== PROPERTY OVERVIEW ===== */}
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <h2 className="flex items-center gap-2.5 text-lg font-semibold text-gray-900 mb-6 font-poppins">
+                  <Home className="w-5 h-5 text-blue-600" />
+                  Property Overview
+                </h2>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 font-poppins">
+                  {metaItems.map((item, index) => (
+                    <div key={index} className="flex flex-col items-center justify-center p-4 bg-gray-50 rounded-xl text-center hover:bg-gray-100 transition-colors">
+                      <item.icon className="w-8 h-8 text-gray-400 mb-2" />
+                      <span className="text-lg font-bold text-gray-900">{item.value}</span>
+                      <span className="text-sm text-gray-500">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* ===== ABOUT SECTION ===== */}
               <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="flex items-center gap-2.5 text-lg font-semibold text-gray-900 mb-6 font-poppins">
+                  <FileText className="w-5 h-5 text-blue-600" />
                   About this place
                 </h2>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base font-nunito">
@@ -477,7 +539,8 @@ export default function PropertyDetailPage() {
               {/* ===== AMENITIES ===== */}
               {property.amenities?.length > 0 && (
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-6">
+                  <h2 className="flex items-center gap-2.5 text-lg font-semibold text-gray-900 mb-6 font-poppins">
+                    <List className="w-5 h-5 text-blue-600" />
                     Amenities
                   </h2>
 
@@ -512,7 +575,8 @@ export default function PropertyDetailPage() {
               {/* ===== MAP ===== */}
               <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
                 <div className="px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="flex items-center gap-2.5 text-lg font-semibold text-gray-900 font-poppins">
+                    <MapPin className="w-5 h-5 text-blue-600" />
                     Property Location
                   </h2>
                 </div>

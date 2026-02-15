@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { MessageCircle, Search, ArrowLeft, X } from "lucide-react";
+import { MessageCircle, Search, ArrowLeft, X, MessageSquare } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // Dynamic import for ChatWindow to avoid SSR issues
@@ -119,7 +119,8 @@ export default function ChatList({ onClose, onUpdateUnread, initialConversation 
                             <ArrowLeft className="w-5 h-5 text-gray-700" />
                         </button>
 
-                        <h2 className="text-lg font-semibold text-gray-900 tracking-tight font-raleway">
+                        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 tracking-tight font-raleway">
+                            <MessageSquare className="hidden md:block w-5 h-5 text-gray-600" />
                             Messages
                         </h2>
                     </div>
