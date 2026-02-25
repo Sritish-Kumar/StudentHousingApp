@@ -18,6 +18,8 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const normalizeEmail = (email) => email.trim().toLowerCase();
+
   // Reset modal state when it opens
   useEffect(() => {
     if (isOpen) {
@@ -47,10 +49,11 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
 
   const validateForm = () => {
     const newErrors = {};
+    const email = normalizeEmail(formData.email);
 
-    if (!formData.email.trim()) {
+    if (!email) {
       newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Email is invalid";
     }
 
@@ -78,7 +81,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: formData.email,
+          email: normalizeEmail(formData.email),
           password: formData.password,
         }),
       });
@@ -130,7 +133,7 @@ export default function LoginModal({ isOpen, onClose, onSwitchToSignup }) {
       await fetch("/api/auth/delete-unverified", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify({ email: normalizeEmail(formData.email) }),
       });
 
       // Switch to signup modal
