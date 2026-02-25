@@ -25,6 +25,8 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const normalizeEmail = (email) => email.trim().toLowerCase();
+
   // Reset modal state when it opens
   useEffect(() => {
     if (isOpen) {
@@ -64,10 +66,11 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
 
   const validateSignup = () => {
     const newErrors = {};
+    const email = normalizeEmail(formData.email);
     if (!formData.name.trim()) newErrors.name = "Full name is required";
-    if (!formData.email.trim()) {
+    if (!email) {
       newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Email is invalid";
     }
     if (!formData.password) {
@@ -95,7 +98,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
-          email: formData.email,
+          email: normalizeEmail(formData.email),
           password: formData.password,
           role: formData.role,
         }),
@@ -129,7 +132,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: formData.email,
+          email: normalizeEmail(formData.email),
           otp: formData.otp,
         }),
       });
@@ -161,7 +164,7 @@ export default function SignupModal({ isOpen, onClose, onSwitchToLogin }) {
       const response = await fetch("/api/auth/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email }),
+        body: JSON.stringify({ email: normalizeEmail(formData.email) }),
       });
 
       const data = await response.json();

@@ -67,15 +67,20 @@ export default function ChatIcon() {
         }
     }, [user, isMounted]);
 
-    // Prevent background scrolling when chat is open
+    // Prevent background scrolling when chat is open on small devices only
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
+        if (typeof window === "undefined") return;
+
+        const isSmallDevice = window.innerWidth < 768; // match mobile breakpoint
+
+        if (isOpen && isSmallDevice) {
+            document.body.style.overflow = "hidden";
         } else {
-            document.body.style.overflow = '';
+            document.body.style.overflow = "";
         }
+
         return () => {
-            document.body.style.overflow = '';
+            document.body.style.overflow = "";
         };
     }, [isOpen]);
 
